@@ -1,3 +1,4 @@
+import './fixPath'
 import {
   app,
   BrowserWindow,
@@ -8,31 +9,9 @@ import {
 } from 'electron'
 import { join } from 'path'
 import { homedir } from 'os'
-import { execSync } from 'child_process'
 import Store from 'electron-store'
 import { claudeService } from './services/ClaudeService'
 import { DEFAULT_SYSTEM_PROMPT } from './systemPrompt'
-
-function fixPath(): void {
-  if (process.platform !== 'darwin') return
-  try {
-    const shellPath = execSync('/bin/zsh -ilc "echo $PATH"', { encoding: 'utf8' }).trim()
-    if (shellPath) {
-      process.env.PATH = shellPath
-    }
-  } catch {
-    try {
-      const bashPath = execSync('/bin/bash -ilc "echo $PATH"', { encoding: 'utf8' }).trim()
-      if (bashPath) {
-        process.env.PATH = bashPath
-      }
-    } catch {
-      // ignore
-    }
-  }
-}
-
-fixPath()
 
 interface ChatSession {
   id: string
@@ -132,12 +111,14 @@ function createWindow(): void {
 }
 
 function createTray(): void {
-  const iconPath = join(__dirname, '../resources/trayTemplate.png')
+  const iconPath = app.isPackaged
+    ? join(process.resourcesPath, 'trayTemplate.png')
+    : join(__dirname, '../resources/trayTemplate.png')
   const icon = nativeImage.createFromPath(iconPath)
   icon.setTemplateImage(true)
 
   tray = new Tray(icon)
-  tray.setToolTip('Personal Assistant')
+  tray.setToolTip('PA')
 
   tray.on('click', () => {
     if (mainWindow?.isVisible()) {
