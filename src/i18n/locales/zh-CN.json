@@ -29,7 +29,9 @@
     },
     "language": {
       "label": "语言"
-    }
+    },
+    "quit": "退出应用",
+    "openAtLogin": "登录时启动"
   },
   "notification": {
     "responseComplete": "回复完成",

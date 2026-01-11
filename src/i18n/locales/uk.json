@@ -29,7 +29,9 @@
     },
     "language": {
       "label": "Мова"
-    }
+    },
+    "quit": "Вийти",
+    "openAtLogin": "Відкрити при вході"
   },
   "notification": {
     "responseComplete": "Відповідь готова",

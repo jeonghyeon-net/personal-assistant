@@ -29,7 +29,9 @@
     },
     "language": {
       "label": "語言"
-    }
+    },
+    "quit": "退出應用",
+    "openAtLogin": "登入時啟動"
   },
   "notification": {
     "responseComplete": "回覆完成",

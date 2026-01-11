@@ -29,7 +29,9 @@
     },
     "language": {
       "label": "언어"
-    }
+    },
+    "quit": "앱 종료",
+    "openAtLogin": "로그인 시 자동 실행"
   },
   "notification": {
     "responseComplete": "응답 완료",

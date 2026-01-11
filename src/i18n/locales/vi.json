@@ -29,7 +29,9 @@
     },
     "language": {
       "label": "Ngôn ngữ"
-    }
+    },
+    "quit": "Thoát",
+    "openAtLogin": "Mở khi đăng nhập"
   },
   "notification": {
     "responseComplete": "Phản hồi hoàn tất",

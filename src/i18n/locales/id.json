@@ -29,7 +29,9 @@
     },
     "language": {
       "label": "Bahasa"
-    }
+    },
+    "quit": "Keluar",
+    "openAtLogin": "Buka saat login"
   },
   "notification": {
     "responseComplete": "Respons Selesai",

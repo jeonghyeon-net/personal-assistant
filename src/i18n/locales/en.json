@@ -29,7 +29,9 @@
     },
     "language": {
       "label": "Language"
-    }
+    },
+    "quit": "Quit App",
+    "openAtLogin": "Open at Login"
   },
   "notification": {
     "responseComplete": "Response Complete",

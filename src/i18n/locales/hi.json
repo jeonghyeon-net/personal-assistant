@@ -29,7 +29,9 @@
     },
     "language": {
       "label": "भाषा"
-    }
+    },
+    "quit": "बाहर निकलें",
+    "openAtLogin": "लॉगिन पर खोलें"
   },
   "notification": {
     "responseComplete": "प्रतिक्रिया पूर्ण",

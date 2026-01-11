@@ -71,6 +71,7 @@ export interface ClaudeAvailability {
 
 export interface ExecuteOptions {
   maxThinkingTokens?: number
+  systemPrompt?: string
 }
 
 export interface API {
@@ -79,15 +80,18 @@ export interface API {
     execute: (prompt: string, options?: ExecuteOptions) => Promise<string | null>
     onStream: (callback: (data: StreamData) => void) => () => void
     abort: () => Promise<boolean>
+    resetSession: () => Promise<void>
   }
   window: {
     hide: () => Promise<void>
     quit: () => Promise<void>
+    onFocus: (callback: () => void) => () => void
   }
   config: {
     get: <T = unknown>(key: string) => Promise<T>
     set: (key: string, value: unknown) => Promise<void>
     setShortcut: (shortcut: string) => Promise<{ success: boolean; error?: string }>
+    setOpenAtLogin: (enabled: boolean) => Promise<{ success: boolean }>
   }
   sessions: {
     list: () => Promise<ChatSession[]>

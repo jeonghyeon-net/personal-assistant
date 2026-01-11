@@ -29,7 +29,9 @@
     },
     "language": {
       "label": "Taal"
-    }
+    },
+    "quit": "Afsluiten",
+    "openAtLogin": "Openen bij aanmelden"
   },
   "notification": {
     "responseComplete": "Antwoord voltooid",

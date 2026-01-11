@@ -29,7 +29,9 @@
     },
     "language": {
       "label": "言語"
-    }
+    },
+    "quit": "アプリを終了",
+    "openAtLogin": "ログイン時に起動"
   },
   "notification": {
     "responseComplete": "応答完了",

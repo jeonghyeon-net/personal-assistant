@@ -29,7 +29,9 @@
     },
     "language": {
       "label": "Idioma"
-    }
+    },
+    "quit": "Salir",
+    "openAtLogin": "Abrir al iniciar sesión"
   },
   "notification": {
     "responseComplete": "Respuesta completada",

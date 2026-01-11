@@ -50,8 +50,8 @@
     "vite-plugin-electron-renderer": "^0.14.6"
   },
   "build": {
-    "appId": "com.personal-assistant.app",
-    "productName": "Personal Assistant",
+    "appId": "com.pa.app",
+    "productName": "PA",
     "mac": {
       "category": "public.app-category.utilities",
       "icon": "resources/icon.icns",

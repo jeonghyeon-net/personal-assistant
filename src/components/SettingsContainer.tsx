@@ -129,6 +129,51 @@ const ResetButton = styled.button`
   }
 `
 
+const QuitButton = styled.button`
+  width: 100%;
+  background: rgba(255,59,48,0.15);
+  border: 1px solid rgba(255,59,48,0.3);
+  border-radius: 4px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #FF453A;
+  cursor: pointer;
+  margin-top: auto;
+
+  &:hover {
+    background: rgba(255,59,48,0.25);
+  }
+`
+
+const ToggleWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`
+
+const Toggle = styled.button<{ $active: boolean }>`
+  width: 42px;
+  height: 24px;
+  border-radius: 12px;
+  border: none;
+  background: ${({ $active }) => $active ? '#34C759' : 'rgba(255,255,255,0.2)'};
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: ${({ $active }) => $active ? '20px' : '2px'};
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: white;
+    transition: left 0.2s;
+  }
+`
+
 const LanguageSelect = styled.select`
   width: 100%;
   background: rgba(255,255,255,0.08);
@@ -200,6 +245,7 @@ export function SettingsContainer({ onBack }: Props): React.ReactElement {
   const [shortcut, setShortcut] = useState('Alt+Space')
   const [isRecording, setIsRecording] = useState(false)
   const [pressedModifiers, setPressedModifiers] = useState<Set<string>>(new Set())
+  const [openAtLogin, setOpenAtLogin] = useState(false)
   const recordingRef = useRef(false)
   const modifiersRef = useRef<Set<string>>(new Set())
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -219,12 +265,19 @@ export function SettingsContainer({ onBack }: Props): React.ReactElement {
   }
 
   useEffect(() => {
-    const loadShortcut = async (): Promise<void> => {
-      const saved = await window.api.config.get<string>('globalShortcut')
-      if (saved) setShortcut(saved)
+    const loadSettings = async (): Promise<void> => {
+      const savedShortcut = await window.api.config.get<string>('globalShortcut')
+      if (savedShortcut) setShortcut(savedShortcut)
+      const savedOpenAtLogin = await window.api.config.get<boolean>('openAtLogin')
+      setOpenAtLogin(savedOpenAtLogin ?? false)
     }
-    loadShortcut()
+    loadSettings()
   }, [])
+
+  const handleOpenAtLoginChange = async (enabled: boolean): Promise<void> => {
+    await window.api.config.setOpenAtLogin(enabled)
+    setOpenAtLogin(enabled)
+  }
 
   useEffect(() => {
     recordingRef.current = isRecording
@@ -330,6 +383,16 @@ export function SettingsContainer({ onBack }: Props): React.ReactElement {
       </Section>
 
       <Section>
+        <ToggleWrapper>
+          <Label style={{ marginBottom: 0 }}>{t('settings.openAtLogin')}</Label>
+          <Toggle
+            $active={openAtLogin}
+            onClick={() => handleOpenAtLoginChange(!openAtLogin)}
+          />
+        </ToggleWrapper>
+      </Section>
+
+      <Section>
         <Label>{t('settings.shortcut.label')}</Label>
         <ShortcutWrapper>
           <ShortcutButton
@@ -358,6 +421,10 @@ export function SettingsContainer({ onBack }: Props): React.ReactElement {
         </PromptWrapper>
         <HelpText>{t('settings.systemPrompt.help')}</HelpText>
       </Section>
+
+      <QuitButton onClick={() => window.api.window.quit()}>
+        {t('settings.quit')}
+      </QuitButton>
     </Container>
   )
 }

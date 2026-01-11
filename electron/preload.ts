@@ -78,6 +78,9 @@ const api = {
 
     setShortcut: (shortcut: string): Promise<{ success: boolean; error?: string }> =>
       ipcRenderer.invoke('config:set-shortcut', shortcut),
+
+    setOpenAtLogin: (enabled: boolean): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke('config:set-open-at-login', enabled),
   },
 
   sessions: {

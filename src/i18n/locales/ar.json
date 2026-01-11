@@ -29,7 +29,9 @@
     },
     "language": {
       "label": "اللغة"
-    }
+    },
+    "quit": "خروج",
+    "openAtLogin": "فتح عند تسجيل الدخول"
   },
   "notification": {
     "responseComplete": "اكتملت الاستجابة",

@@ -29,7 +29,9 @@
     },
     "language": {
       "label": "Dil"
-    }
+    },
+    "quit": "Çıkış",
+    "openAtLogin": "Girişte aç"
   },
   "notification": {
     "responseComplete": "Yanıt Tamamlandı",

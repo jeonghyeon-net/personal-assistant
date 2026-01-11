@@ -8,9 +8,31 @@ import {
 } from 'electron'
 import { join } from 'path'
 import { homedir } from 'os'
+import { execSync } from 'child_process'
 import Store from 'electron-store'
 import { claudeService } from './services/ClaudeService'
 import { DEFAULT_SYSTEM_PROMPT } from './systemPrompt'
+
+function fixPath(): void {
+  if (process.platform !== 'darwin') return
+  try {
+    const shellPath = execSync('/bin/zsh -ilc "echo $PATH"', { encoding: 'utf8' }).trim()
+    if (shellPath) {
+      process.env.PATH = shellPath
+    }
+  } catch {
+    try {
+      const bashPath = execSync('/bin/bash -ilc "echo $PATH"', { encoding: 'utf8' }).trim()
+      if (bashPath) {
+        process.env.PATH = bashPath
+      }
+    } catch {
+      // ignore
+    }
+  }
+}
+
+fixPath()
 
 interface ChatSession {
   id: string
@@ -26,6 +48,7 @@ interface StoreSchema {
   globalShortcut: string
   systemPrompt: string
   sessions: ChatSession[]
+  openAtLogin: boolean
 }
 
 const store = new Store<StoreSchema>({
@@ -34,6 +57,7 @@ const store = new Store<StoreSchema>({
     globalShortcut: 'Alt+Space',
     systemPrompt: DEFAULT_SYSTEM_PROMPT,
     sessions: [],
+    openAtLogin: false,
   },
 })
 
@@ -189,6 +213,15 @@ ipcMain.handle('config:set-shortcut', (_event, shortcut: string) => {
     return { success: true }
   }
   return { success: false, error: '단축키 등록 실패' }
+})
+
+ipcMain.handle('config:set-open-at-login', (_event, enabled: boolean) => {
+  app.setLoginItemSettings({
+    openAtLogin: enabled,
+    openAsHidden: true,
+  })
+  store.set('openAtLogin', enabled)
+  return { success: true }
 })
 
 ipcMain.handle('sessions:list', () => {

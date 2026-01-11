@@ -29,7 +29,9 @@
     },
     "language": {
       "label": "ภาษา"
-    }
+    },
+    "quit": "ออก",
+    "openAtLogin": "เปิดเมื่อล็อกอิน"
   },
   "notification": {
     "responseComplete": "ตอบกลับเสร็จสิ้น",

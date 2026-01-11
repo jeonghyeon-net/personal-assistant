@@ -29,7 +29,9 @@
     },
     "language": {
       "label": "Langue"
-    }
+    },
+    "quit": "Quitter",
+    "openAtLogin": "Ouvrir à la connexion"
   },
   "notification": {
     "responseComplete": "Réponse terminée",

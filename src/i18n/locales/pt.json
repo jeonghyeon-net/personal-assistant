@@ -29,7 +29,9 @@
     },
     "language": {
       "label": "Idioma"
-    }
+    },
+    "quit": "Sair",
+    "openAtLogin": "Abrir ao fazer login"
   },
   "notification": {
     "responseComplete": "Resposta concluída",
