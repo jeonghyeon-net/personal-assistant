@@ -1,0 +1,41 @@
+{
+  "chat": {
+    "newChat": "新對話",
+    "aborted": "[已中斷]",
+    "placeholder": "輸入訊息..."
+  },
+  "sessions": {
+    "title": "對話記錄",
+    "back": "← 對話記錄",
+    "empty": "尚無儲存的對話",
+    "delete": "刪除",
+    "yesterday": "昨天",
+    "daysAgo": "{{days}}天前"
+  },
+  "settings": {
+    "title": "設定",
+    "back": "← 設定",
+    "shortcut": {
+      "label": "全域快捷鍵",
+      "waiting": "等待按鍵...",
+      "reset": "恢復預設",
+      "help": "點擊後輸入新快捷鍵 · ESC取消 · ×恢復預設(⌥ Space)"
+    },
+    "systemPrompt": {
+      "label": "系統提示詞",
+      "placeholder": "設定AI的性格和語氣...",
+      "reset": "恢復預設",
+      "help": "輸入AI在對話中遵循的指令"
+    },
+    "language": {
+      "label": "語言"
+    }
+  },
+  "notification": {
+    "responseComplete": "回覆完成",
+    "messageArrived": "您的訊息已送達！"
+  },
+  "error": {
+    "claudeUnavailable": "Claude CLI無法使用。請安裝Claude Code。"
+  }
+}

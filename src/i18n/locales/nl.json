@@ -1,0 +1,41 @@
+{
+  "chat": {
+    "newChat": "Nieuw gesprek",
+    "aborted": "[Afgebroken]",
+    "placeholder": "Bericht..."
+  },
+  "sessions": {
+    "title": "Geschiedenis",
+    "back": "← Geschiedenis",
+    "empty": "Nog geen opgeslagen gesprekken",
+    "delete": "Verwijderen",
+    "yesterday": "Gisteren",
+    "daysAgo": "{{days}} dagen geleden"
+  },
+  "settings": {
+    "title": "Instellingen",
+    "back": "← Instellingen",
+    "shortcut": {
+      "label": "Globale sneltoets",
+      "waiting": "Wachten op invoer...",
+      "reset": "Herstellen",
+      "help": "Klik en voer nieuwe sneltoets in · ESC om te annuleren · × om standaard te herstellen (⌥ Space)"
+    },
+    "systemPrompt": {
+      "label": "Systeemprompt",
+      "placeholder": "Stel AI-persoonlijkheid in...",
+      "reset": "Herstellen",
+      "help": "Voer instructies in voor de AI"
+    },
+    "language": {
+      "label": "Taal"
+    }
+  },
+  "notification": {
+    "responseComplete": "Antwoord voltooid",
+    "messageArrived": "Je bericht is aangekomen!"
+  },
+  "error": {
+    "claudeUnavailable": "Claude CLI niet beschikbaar. Installeer Claude Code."
+  }
+}

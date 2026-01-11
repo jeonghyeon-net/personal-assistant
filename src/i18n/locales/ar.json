@@ -1,0 +1,41 @@
+{
+  "chat": {
+    "newChat": "محادثة جديدة",
+    "aborted": "[تم الإلغاء]",
+    "placeholder": "رسالة..."
+  },
+  "sessions": {
+    "title": "السجل",
+    "back": "→ السجل",
+    "empty": "لا توجد محادثات محفوظة بعد",
+    "delete": "حذف",
+    "yesterday": "أمس",
+    "daysAgo": "منذ {{days}} أيام"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "back": "→ الإعدادات",
+    "shortcut": {
+      "label": "اختصار عام",
+      "waiting": "في انتظار الإدخال...",
+      "reset": "إعادة تعيين",
+      "help": "انقر وأدخل اختصارًا جديدًا · ESC للإلغاء · × للاستعادة (⌥ Space)"
+    },
+    "systemPrompt": {
+      "label": "موجه النظام",
+      "placeholder": "تعيين شخصية الذكاء الاصطناعي...",
+      "reset": "إعادة تعيين",
+      "help": "أدخل التعليمات ليتبعها الذكاء الاصطناعي"
+    },
+    "language": {
+      "label": "اللغة"
+    }
+  },
+  "notification": {
+    "responseComplete": "اكتملت الاستجابة",
+    "messageArrived": "وصلت رسالتك!"
+  },
+  "error": {
+    "claudeUnavailable": "Claude CLI غير متاح. يرجى تثبيت Claude Code."
+  }
+}

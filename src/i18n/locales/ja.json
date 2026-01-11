@@ -1,0 +1,41 @@
+{
+  "chat": {
+    "newChat": "新しい会話",
+    "aborted": "[中断されました]",
+    "placeholder": "メッセージ..."
+  },
+  "sessions": {
+    "title": "会話履歴",
+    "back": "← 会話履歴",
+    "empty": "保存された会話はまだありません",
+    "delete": "削除",
+    "yesterday": "昨日",
+    "daysAgo": "{{days}}日前"
+  },
+  "settings": {
+    "title": "設定",
+    "back": "← 設定",
+    "shortcut": {
+      "label": "グローバルショートカット",
+      "waiting": "キー入力待ち...",
+      "reset": "デフォルトに戻す",
+      "help": "クリックして新しいショートカットを入力 · ESCでキャンセル · ×でデフォルト(⌥ Space)に復元"
+    },
+    "systemPrompt": {
+      "label": "システムプロンプト",
+      "placeholder": "AIの性格と話し方を設定してください...",
+      "reset": "デフォルトに戻す",
+      "help": "会話中にAIが従う指示を入力してください"
+    },
+    "language": {
+      "label": "言語"
+    }
+  },
+  "notification": {
+    "responseComplete": "応答完了",
+    "messageArrived": "メッセージが届きました！"
+  },
+  "error": {
+    "claudeUnavailable": "Claude CLIが利用できません。Claude Codeをインストールしてください。"
+  }
+}

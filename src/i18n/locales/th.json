@@ -1,0 +1,41 @@
+{
+  "chat": {
+    "newChat": "แชทใหม่",
+    "aborted": "[ยกเลิกแล้ว]",
+    "placeholder": "ข้อความ..."
+  },
+  "sessions": {
+    "title": "ประวัติ",
+    "back": "← ประวัติ",
+    "empty": "ยังไม่มีการสนทนาที่บันทึกไว้",
+    "delete": "ลบ",
+    "yesterday": "เมื่อวาน",
+    "daysAgo": "{{days}} วันที่แล้ว"
+  },
+  "settings": {
+    "title": "ตั้งค่า",
+    "back": "← ตั้งค่า",
+    "shortcut": {
+      "label": "ปุ่มลัดทั่วไป",
+      "waiting": "รอการป้อน...",
+      "reset": "รีเซ็ต",
+      "help": "คลิกแล้วกดปุ่มลัดใหม่ · ESC เพื่อยกเลิก · × เพื่อคืนค่า (⌥ Space)"
+    },
+    "systemPrompt": {
+      "label": "System Prompt",
+      "placeholder": "ตั้งค่าบุคลิกของ AI...",
+      "reset": "รีเซ็ต",
+      "help": "ป้อนคำสั่งสำหรับ AI ปฏิบัติตาม"
+    },
+    "language": {
+      "label": "ภาษา"
+    }
+  },
+  "notification": {
+    "responseComplete": "ตอบกลับเสร็จสิ้น",
+    "messageArrived": "ข้อความของคุณมาถึงแล้ว!"
+  },
+  "error": {
+    "claudeUnavailable": "Claude CLI ไม่พร้อมใช้งาน กรุณาติดตั้ง Claude Code"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "chat": {
+    "newChat": "Новий чат",
+    "aborted": "[Перервано]",
+    "placeholder": "Повідомлення..."
+  },
+  "sessions": {
+    "title": "Історія",
+    "back": "← Історія",
+    "empty": "Ще немає збережених розмов",
+    "delete": "Видалити",
+    "yesterday": "Вчора",
+    "daysAgo": "{{days}} днів тому"
+  },
+  "settings": {
+    "title": "Налаштування",
+    "back": "← Налаштування",
+    "shortcut": {
+      "label": "Глобальна комбінація клавіш",
+      "waiting": "Очікування введення...",
+      "reset": "Скинути",
+      "help": "Натисніть і введіть нову комбінацію · ESC для скасування · × для відновлення (⌥ Space)"
+    },
+    "systemPrompt": {
+      "label": "Системний промпт",
+      "placeholder": "Налаштуйте особистість ШІ...",
+      "reset": "Скинути",
+      "help": "Введіть інструкції для ШІ"
+    },
+    "language": {
+      "label": "Мова"
+    }
+  },
+  "notification": {
+    "responseComplete": "Відповідь готова",
+    "messageArrived": "Ваше повідомлення надійшло!"
+  },
+  "error": {
+    "claudeUnavailable": "Claude CLI недоступний. Встановіть Claude Code."
+  }
+}

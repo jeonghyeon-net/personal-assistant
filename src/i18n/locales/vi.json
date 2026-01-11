@@ -1,0 +1,41 @@
+{
+  "chat": {
+    "newChat": "Cuộc trò chuyện mới",
+    "aborted": "[Đã hủy]",
+    "placeholder": "Tin nhắn..."
+  },
+  "sessions": {
+    "title": "Lịch sử",
+    "back": "← Lịch sử",
+    "empty": "Chưa có cuộc trò chuyện nào được lưu",
+    "delete": "Xóa",
+    "yesterday": "Hôm qua",
+    "daysAgo": "{{days}} ngày trước"
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "back": "← Cài đặt",
+    "shortcut": {
+      "label": "Phím tắt toàn cục",
+      "waiting": "Đang chờ nhập...",
+      "reset": "Đặt lại",
+      "help": "Nhấp và nhập phím tắt mới · ESC để hủy · × để khôi phục (⌥ Space)"
+    },
+    "systemPrompt": {
+      "label": "Prompt hệ thống",
+      "placeholder": "Thiết lập tính cách AI...",
+      "reset": "Đặt lại",
+      "help": "Nhập hướng dẫn cho AI làm theo"
+    },
+    "language": {
+      "label": "Ngôn ngữ"
+    }
+  },
+  "notification": {
+    "responseComplete": "Phản hồi hoàn tất",
+    "messageArrived": "Tin nhắn của bạn đã đến!"
+  },
+  "error": {
+    "claudeUnavailable": "Claude CLI không khả dụng. Vui lòng cài đặt Claude Code."
+  }
+}

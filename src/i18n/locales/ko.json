@@ -1,0 +1,41 @@
+{
+  "chat": {
+    "newChat": "새 대화",
+    "aborted": "[중단됨]",
+    "placeholder": "메시지 입력..."
+  },
+  "sessions": {
+    "title": "대화 기록",
+    "back": "← 대화 기록",
+    "empty": "아직 저장된 대화가 없어요",
+    "delete": "삭제",
+    "yesterday": "어제",
+    "daysAgo": "{{days}}일 전"
+  },
+  "settings": {
+    "title": "설정",
+    "back": "← 설정",
+    "shortcut": {
+      "label": "전역 단축키",
+      "waiting": "키 입력 대기...",
+      "reset": "기본값으로 초기화",
+      "help": "클릭 후 새 단축키 입력 · ESC로 취소 · ×로 기본값(⌥ Space) 복원"
+    },
+    "systemPrompt": {
+      "label": "시스템 프롬프트",
+      "placeholder": "AI의 성격과 말투를 설정하세요...",
+      "reset": "기본값으로 초기화",
+      "help": "AI가 대화할 때 따를 지침을 입력하세요"
+    },
+    "language": {
+      "label": "언어"
+    }
+  },
+  "notification": {
+    "responseComplete": "응답 완료",
+    "messageArrived": "메시지가 도착했어요!"
+  },
+  "error": {
+    "claudeUnavailable": "Claude CLI가 사용 불가능합니다. Claude Code를 설치해주세요."
+  }
+}

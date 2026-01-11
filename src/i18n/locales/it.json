@@ -1,0 +1,41 @@
+{
+  "chat": {
+    "newChat": "Nuova chat",
+    "aborted": "[Annullato]",
+    "placeholder": "Messaggio..."
+  },
+  "sessions": {
+    "title": "Cronologia",
+    "back": "← Cronologia",
+    "empty": "Nessuna conversazione salvata",
+    "delete": "Elimina",
+    "yesterday": "Ieri",
+    "daysAgo": "{{days}} giorni fa"
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "back": "← Impostazioni",
+    "shortcut": {
+      "label": "Scorciatoia globale",
+      "waiting": "In attesa...",
+      "reset": "Ripristina",
+      "help": "Clicca e inserisci nuova scorciatoia · ESC per annullare · × per ripristinare (⌥ Space)"
+    },
+    "systemPrompt": {
+      "label": "Prompt di sistema",
+      "placeholder": "Imposta la personalità dell'IA...",
+      "reset": "Ripristina",
+      "help": "Inserisci le istruzioni per l'IA"
+    },
+    "language": {
+      "label": "Lingua"
+    }
+  },
+  "notification": {
+    "responseComplete": "Risposta completata",
+    "messageArrived": "Il tuo messaggio è arrivato!"
+  },
+  "error": {
+    "claudeUnavailable": "Claude CLI non disponibile. Installa Claude Code."
+  }
+}

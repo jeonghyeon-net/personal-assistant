@@ -1,0 +1,41 @@
+{
+  "chat": {
+    "newChat": "Yeni Sohbet",
+    "aborted": "[İptal Edildi]",
+    "placeholder": "Mesaj..."
+  },
+  "sessions": {
+    "title": "Geçmiş",
+    "back": "← Geçmiş",
+    "empty": "Henüz kaydedilmiş sohbet yok",
+    "delete": "Sil",
+    "yesterday": "Dün",
+    "daysAgo": "{{days}} gün önce"
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "back": "← Ayarlar",
+    "shortcut": {
+      "label": "Global Kısayol",
+      "waiting": "Giriş bekleniyor...",
+      "reset": "Sıfırla",
+      "help": "Tıklayın ve yeni kısayol girin · İptal için ESC · Varsayılana dönmek için × (⌥ Space)"
+    },
+    "systemPrompt": {
+      "label": "Sistem Promptu",
+      "placeholder": "AI kişiliğini ayarlayın...",
+      "reset": "Sıfırla",
+      "help": "AI'nın izleyeceği talimatları girin"
+    },
+    "language": {
+      "label": "Dil"
+    }
+  },
+  "notification": {
+    "responseComplete": "Yanıt Tamamlandı",
+    "messageArrived": "Mesajınız ulaştı!"
+  },
+  "error": {
+    "claudeUnavailable": "Claude CLI kullanılamıyor. Lütfen Claude Code yükleyin."
+  }
+}

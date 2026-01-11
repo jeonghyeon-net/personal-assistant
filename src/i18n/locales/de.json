@@ -1,0 +1,41 @@
+{
+  "chat": {
+    "newChat": "Neuer Chat",
+    "aborted": "[Abgebrochen]",
+    "placeholder": "Nachricht..."
+  },
+  "sessions": {
+    "title": "Verlauf",
+    "back": "← Verlauf",
+    "empty": "Noch keine gespeicherten Gespräche",
+    "delete": "Löschen",
+    "yesterday": "Gestern",
+    "daysAgo": "vor {{days}} Tagen"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "back": "← Einstellungen",
+    "shortcut": {
+      "label": "Globale Tastenkombination",
+      "waiting": "Warte auf Eingabe...",
+      "reset": "Zurücksetzen",
+      "help": "Klicken und neue Tastenkombination eingeben · ESC zum Abbrechen · × für Standard (⌥ Space)"
+    },
+    "systemPrompt": {
+      "label": "System-Prompt",
+      "placeholder": "KI-Persönlichkeit festlegen...",
+      "reset": "Zurücksetzen",
+      "help": "Anweisungen eingeben, denen die KI folgen soll"
+    },
+    "language": {
+      "label": "Sprache"
+    }
+  },
+  "notification": {
+    "responseComplete": "Antwort abgeschlossen",
+    "messageArrived": "Ihre Nachricht ist angekommen!"
+  },
+  "error": {
+    "claudeUnavailable": "Claude CLI nicht verfügbar. Bitte installieren Sie Claude Code."
+  }
+}

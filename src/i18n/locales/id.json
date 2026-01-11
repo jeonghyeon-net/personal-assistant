@@ -1,0 +1,41 @@
+{
+  "chat": {
+    "newChat": "Obrolan Baru",
+    "aborted": "[Dibatalkan]",
+    "placeholder": "Pesan..."
+  },
+  "sessions": {
+    "title": "Riwayat",
+    "back": "← Riwayat",
+    "empty": "Belum ada percakapan tersimpan",
+    "delete": "Hapus",
+    "yesterday": "Kemarin",
+    "daysAgo": "{{days}} hari lalu"
+  },
+  "settings": {
+    "title": "Pengaturan",
+    "back": "← Pengaturan",
+    "shortcut": {
+      "label": "Pintasan Global",
+      "waiting": "Menunggu input...",
+      "reset": "Atur ulang",
+      "help": "Klik dan masukkan pintasan baru · ESC untuk batal · × untuk memulihkan (⌥ Space)"
+    },
+    "systemPrompt": {
+      "label": "System Prompt",
+      "placeholder": "Atur kepribadian AI...",
+      "reset": "Atur ulang",
+      "help": "Masukkan instruksi untuk diikuti AI"
+    },
+    "language": {
+      "label": "Bahasa"
+    }
+  },
+  "notification": {
+    "responseComplete": "Respons Selesai",
+    "messageArrived": "Pesan Anda telah tiba!"
+  },
+  "error": {
+    "claudeUnavailable": "Claude CLI tidak tersedia. Silakan instal Claude Code."
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "chat": {
+    "newChat": "नई चैट",
+    "aborted": "[रद्द किया गया]",
+    "placeholder": "संदेश..."
+  },
+  "sessions": {
+    "title": "इतिहास",
+    "back": "← इतिहास",
+    "empty": "अभी तक कोई सहेजी गई बातचीत नहीं",
+    "delete": "हटाएं",
+    "yesterday": "कल",
+    "daysAgo": "{{days}} दिन पहले"
+  },
+  "settings": {
+    "title": "सेटिंग्स",
+    "back": "← सेटिंग्स",
+    "shortcut": {
+      "label": "वैश्विक शॉर्टकट",
+      "waiting": "इनपुट की प्रतीक्षा...",
+      "reset": "रीसेट करें",
+      "help": "क्लिक करें और नया शॉर्टकट दर्ज करें · रद्द करने के लिए ESC · डिफ़ॉल्ट के लिए × (⌥ Space)"
+    },
+    "systemPrompt": {
+      "label": "सिस्टम प्रॉम्प्ट",
+      "placeholder": "AI की व्यक्तित्व सेट करें...",
+      "reset": "रीसेट करें",
+      "help": "AI के लिए निर्देश दर्ज करें"
+    },
+    "language": {
+      "label": "भाषा"
+    }
+  },
+  "notification": {
+    "responseComplete": "प्रतिक्रिया पूर्ण",
+    "messageArrived": "आपका संदेश आ गया है!"
+  },
+  "error": {
+    "claudeUnavailable": "Claude CLI उपलब्ध नहीं है। कृपया Claude Code इंस्टॉल करें।"
+  }
+}

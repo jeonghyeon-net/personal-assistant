@@ -1,0 +1,41 @@
+{
+  "chat": {
+    "newChat": "新对话",
+    "aborted": "[已中断]",
+    "placeholder": "输入消息..."
+  },
+  "sessions": {
+    "title": "对话记录",
+    "back": "← 对话记录",
+    "empty": "暂无保存的对话",
+    "delete": "删除",
+    "yesterday": "昨天",
+    "daysAgo": "{{days}}天前"
+  },
+  "settings": {
+    "title": "设置",
+    "back": "← 设置",
+    "shortcut": {
+      "label": "全局快捷键",
+      "waiting": "等待按键...",
+      "reset": "恢复默认",
+      "help": "点击后输入新快捷键 · ESC取消 · ×恢复默认(⌥ Space)"
+    },
+    "systemPrompt": {
+      "label": "系统提示词",
+      "placeholder": "设置AI的性格和语气...",
+      "reset": "恢复默认",
+      "help": "输入AI在对话中遵循的指令"
+    },
+    "language": {
+      "label": "语言"
+    }
+  },
+  "notification": {
+    "responseComplete": "回复完成",
+    "messageArrived": "您的消息已送达！"
+  },
+  "error": {
+    "claudeUnavailable": "Claude CLI不可用。请安装Claude Code。"
+  }
+}

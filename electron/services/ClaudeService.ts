@@ -1,0 +1,492 @@
+import { BrowserWindow, Notification } from 'electron'
+import { execSync } from 'child_process'
+import { existsSync, readdirSync } from 'fs'
+import { join } from 'path'
+import { homedir, platform } from 'os'
+import { query } from '@anthropic-ai/claude-agent-sdk'
+import type {
+  Query,
+  Options,
+  SDKMessage,
+  SDKSystemMessage,
+  SDKResultMessage,
+  SDKPartialAssistantMessage,
+} from '@anthropic-ai/claude-agent-sdk'
+
+interface ClaudeError {
+  code: string
+  message: string
+  details?: string
+}
+
+interface ClaudeAvailability {
+  available: boolean
+  path?: string
+  error?: ClaudeError
+}
+
+interface ClaudePathResult {
+  found: boolean
+  path: string
+  error?: ClaudeError
+}
+
+const DEFAULT_SYSTEM_PROMPT = {
+  type: 'preset' as const,
+  preset: 'claude_code' as const,
+}
+
+function findClaudePath(): ClaudePathResult {
+  const isWindows = platform() === 'win32'
+  const isMac = platform() === 'darwin'
+  const home = homedir()
+
+  const scanDir = (baseDir: string, pattern: (name: string) => boolean, subPath: string): string[] => {
+    if (!existsSync(baseDir)) return []
+    try {
+      return readdirSync(baseDir)
+        .filter(pattern)
+        .map((dir) => join(baseDir, dir, subPath))
+    } catch {
+      return []
+    }
+  }
+
+  const getDynamicPaths = (): string[] => {
+    const paths: string[] = []
+
+    paths.push(...scanDir(join(home, '.nvm/versions/node'), (d) => d.startsWith('v'), 'bin/claude'))
+    paths.push(...scanDir(join(home, 'Library/Application Support/fnm/node-versions'), (d) => d.startsWith('v'), 'installation/bin/claude'))
+    paths.push(...scanDir(join(home, '.local/share/fnm/node-versions'), (d) => d.startsWith('v'), 'installation/bin/claude'))
+    paths.push(...scanDir(join(home, '.fnm/node-versions'), (d) => d.startsWith('v'), 'installation/bin/claude'))
+    paths.push(...scanDir('/opt/homebrew/Cellar/node', () => true, 'bin/claude'))
+    paths.push(...scanDir('/usr/local/Cellar/node', () => true, 'bin/claude'))
+    paths.push(...scanDir(join(home, '.volta/tools/image/node'), () => true, 'bin/claude'))
+    paths.push(...scanDir(join(home, '.asdf/installs/nodejs'), () => true, 'bin/claude'))
+
+    return paths
+  }
+
+  const staticPaths = isWindows
+    ? [
+        'C:\\Program Files\\Claude\\claude.exe',
+        join(home, 'AppData\\Roaming\\npm\\claude.cmd'),
+        join(home, 'AppData\\Roaming\\npm\\claude'),
+        join(home, '.claude\\local\\claude.exe'),
+      ]
+    : [
+        '/usr/local/bin/claude',
+        '/opt/homebrew/bin/claude',
+        '/usr/bin/claude',
+        join(home, '.npm-global/bin/claude'),
+        join(home, '.local/bin/claude'),
+        join(home, '.claude/local/claude'),
+        join(home, 'n/bin/claude'),
+      ]
+
+  const commonPaths = [...staticPaths, ...getDynamicPaths()]
+
+  for (const candidatePath of commonPaths) {
+    if (existsSync(candidatePath)) {
+      console.log('[findClaudePath] Found at common path:', candidatePath)
+      return { found: true, path: candidatePath }
+    }
+  }
+
+  const tryFindClaude = (command: string): string | null => {
+    console.log('[findClaudePath] Trying command:', command)
+    try {
+      const foundPath = execSync(command, { encoding: 'utf8', timeout: 5000 }).trim()
+      const firstPath = foundPath.split('\n')[0]?.trim()
+      if (firstPath) {
+        console.log('[findClaudePath] Found path:', firstPath)
+        return firstPath
+      }
+    } catch (error) {
+      console.log('[findClaudePath] Command failed:', command, error instanceof Error ? error.message : error)
+      return null
+    }
+    return null
+  }
+
+  let foundPath: string | null = null
+
+  if (isMac) {
+    foundPath = tryFindClaude('/bin/zsh -lc "which claude"')
+    if (!foundPath) {
+      foundPath = tryFindClaude('/bin/bash -lc "which claude"')
+    }
+  } else if (isWindows) {
+    foundPath = tryFindClaude('where claude')
+  } else {
+    foundPath = tryFindClaude('which claude')
+  }
+
+  if (foundPath) {
+    return { found: true, path: foundPath }
+  }
+
+  const defaultPath = isWindows ? 'claude.exe' : 'claude'
+  return {
+    found: false,
+    path: defaultPath,
+    error: {
+      code: 'CLAUDE_NOT_FOUND',
+      message: 'Claude CLI를 찾을 수 없습니다. Claude Code를 설치해주세요.',
+      details: 'https://claude.ai/code 에서 설치 가능합니다.',
+    },
+  }
+}
+
+class ClaudeService {
+  private activeQuery: Query | null = null
+  private claudeSessionId: string | null = null
+  private claudePath: string
+  private claudeAvailable: boolean
+  private claudeError?: ClaudeError
+
+  constructor() {
+    const pathResult = findClaudePath()
+    this.claudePath = pathResult.path
+    this.claudeAvailable = pathResult.found
+    this.claudeError = pathResult.error
+    console.log('[ClaudeService] Claude path:', this.claudePath, 'available:', this.claudeAvailable)
+  }
+
+  checkAvailability(): ClaudeAvailability {
+    if (this.claudeAvailable) {
+      return { available: true, path: this.claudePath }
+    }
+    return {
+      available: false,
+      error: this.claudeError ?? {
+        code: 'CLAUDE_NOT_FOUND',
+        message: 'Claude CLI를 찾을 수 없습니다.',
+      },
+    }
+  }
+
+  async execute(
+    workDir: string,
+    prompt: string,
+    window: BrowserWindow,
+    options?: {
+      maxThinkingTokens?: number
+      systemPrompt?: string
+    }
+  ): Promise<string | null> {
+    console.log('[ClaudeService] Starting execution with prompt:', prompt.substring(0, 100))
+
+    const sdkOptions: Options = {
+      cwd: workDir,
+      pathToClaudeCodeExecutable: this.claudePath,
+      systemPrompt: options?.systemPrompt || DEFAULT_SYSTEM_PROMPT,
+      settingSources: ['user', 'project', 'local'],
+      maxTurns: 1000,
+      includePartialMessages: true,
+      permissionMode: 'bypassPermissions',
+      resume: this.claudeSessionId ?? undefined,
+      maxThinkingTokens: options?.maxThinkingTokens,
+    }
+
+    try {
+      const queryResult = query({
+        prompt,
+        options: sdkOptions,
+      })
+
+      this.activeQuery = queryResult
+
+      let newClaudeSessionId: string | null = null
+
+      for await (const message of queryResult) {
+        const processedMessage = this.processMessage(message, window)
+        if (processedMessage?.claudeSessionId) {
+          newClaudeSessionId = processedMessage.claudeSessionId
+          this.claudeSessionId = newClaudeSessionId
+        }
+      }
+
+      window.webContents.send('claude:stream', {
+        type: 'end',
+        exitCode: 0,
+      })
+
+      if (Notification.isSupported() && !window.isFocused()) {
+        this.generateNotification('').then(({ title, body }) => {
+          const notification = new Notification({
+            title,
+            body,
+            silent: false,
+          })
+          notification.on('click', () => {
+            window.show()
+            window.focus()
+            window.webContents.focus()
+            window.webContents.send('window:focus')
+          })
+          notification.show()
+        })
+      }
+
+      this.activeQuery = null
+      return newClaudeSessionId
+    } catch (error) {
+      console.error('[ClaudeService] Query error:', error)
+      window.webContents.send('claude:stream', {
+        type: 'error',
+        content: error instanceof Error ? error.message : String(error),
+      })
+      this.activeQuery = null
+      return null
+    }
+  }
+
+  private processMessage(
+    message: SDKMessage,
+    window: BrowserWindow
+  ): { claudeSessionId?: string } | null {
+    if (message.type === 'system') {
+      const sysMsg = message as SDKSystemMessage
+      if (sysMsg.subtype === 'init') {
+        console.log('[ClaudeService] Claude Session ID:', sysMsg.session_id)
+        return { claudeSessionId: sysMsg.session_id }
+      }
+      if (sysMsg.subtype === 'compact_boundary') {
+        window.webContents.send('claude:stream', {
+          type: 'compact_start',
+        })
+      }
+    }
+
+    if (message.type === 'stream_event') {
+      const partialMsg = message as SDKPartialAssistantMessage
+      const event = partialMsg.event
+
+      if (event.type === 'content_block_start') {
+        const contentBlock = event.content_block
+        if (contentBlock.type === 'thinking') {
+          window.webContents.send('claude:stream', {
+            type: 'thinking_start',
+          })
+        } else if (contentBlock.type === 'tool_use') {
+          window.webContents.send('claude:stream', {
+            type: 'tool_use',
+            toolName: contentBlock.name,
+            input: '',
+          })
+        }
+      }
+
+      if (event.type === 'content_block_delta') {
+        const delta = event.delta
+        if (delta.type === 'thinking_delta' && 'thinking' in delta) {
+          window.webContents.send('claude:stream', {
+            type: 'thinking',
+            content: delta.thinking,
+          })
+        } else if (delta.type === 'text_delta' && 'text' in delta) {
+          window.webContents.send('claude:stream', {
+            type: 'stdout',
+            content: delta.text,
+          })
+        } else if (delta.type === 'input_json_delta' && 'partial_json' in delta) {
+          window.webContents.send('claude:stream', {
+            type: 'tool_use',
+            input: delta.partial_json,
+          })
+        }
+      }
+
+      if (event.type === 'content_block_stop') {
+        window.webContents.send('claude:stream', {
+          type: 'content_block_stop',
+        })
+      }
+    }
+
+    if (message.type === 'assistant' || message.type === 'user') {
+      const msg = message as { message?: { content?: Array<{ type: string; tool_use_id?: string; content?: string | unknown }> } }
+      if (msg.message?.content) {
+        for (const block of msg.message.content) {
+          if (block.type === 'tool_result') {
+            window.webContents.send('claude:stream', {
+              type: 'tool_result',
+              toolName: block.tool_use_id ?? '',
+              content: typeof block.content === 'string' ? block.content : JSON.stringify(block.content),
+            })
+          }
+        }
+      }
+    }
+
+    if (message.type === 'result') {
+      const resultMsg = message as SDKResultMessage
+      if (resultMsg.is_error && 'errors' in resultMsg) {
+        const errorContent = resultMsg.errors?.join('\n') ?? 'Unknown error'
+        const rateLimitMatch = errorContent.match(/Rate limit reached.*?resets at (\d{4}-\d{2}-\d{2}T[\d:]+(?:[+-]\d{2}:\d{2}|Z))/i)
+        if (rateLimitMatch?.[1]) {
+          window.webContents.send('claude:stream', {
+            type: 'rate_limit',
+            content: errorContent,
+            resetTime: rateLimitMatch[1],
+          })
+        } else {
+          window.webContents.send('claude:stream', {
+            type: 'error',
+            content: errorContent,
+          })
+        }
+      }
+
+      if ('usage' in resultMsg && 'modelUsage' in resultMsg) {
+        const usage = resultMsg.usage as { input_tokens?: number; output_tokens?: number; cache_read_input_tokens?: number; cache_creation_input_tokens?: number }
+        const modelUsage = resultMsg.modelUsage as Record<string, { contextWindow?: number }>
+        const firstModelUsage = Object.values(modelUsage)[0]
+        window.webContents.send('claude:stream', {
+          type: 'usage',
+          usage: {
+            inputTokens: usage.input_tokens ?? 0,
+            outputTokens: usage.output_tokens ?? 0,
+            cacheReadInputTokens: usage.cache_read_input_tokens ?? 0,
+            cacheCreationInputTokens: usage.cache_creation_input_tokens ?? 0,
+            contextWindowSize: firstModelUsage?.contextWindow ?? 200000,
+          },
+        })
+      }
+
+      return { claudeSessionId: resultMsg.session_id }
+    }
+
+    return null
+  }
+
+  async abort(): Promise<boolean> {
+    if (this.activeQuery) {
+      try {
+        await this.activeQuery.interrupt()
+        this.activeQuery = null
+        return true
+      } catch (error) {
+        console.error('[ClaudeService] Abort error:', error)
+        return false
+      }
+    }
+    return false
+  }
+
+  async cleanup(): Promise<void> {
+    console.log('[ClaudeService] Cleaning up...')
+    if (this.activeQuery) {
+      try {
+        await this.activeQuery.interrupt()
+      } catch (error) {
+        console.error('[ClaudeService] Cleanup error:', error)
+      }
+    }
+    this.activeQuery = null
+  }
+
+  resetSession(): void {
+    console.log('[ClaudeService] Resetting session')
+    this.claudeSessionId = null
+  }
+
+  async generateTitle(message: string): Promise<{ success: boolean; title: string }> {
+    if (!this.claudeAvailable) {
+      return { success: false, title: message.slice(0, 30) }
+    }
+
+    const prompt = `다음 메시지의 핵심 주제를 한국어로 10자 이내로 요약해줘. 따옴표나 설명 없이 제목만 출력해:\n\n${message}`
+
+    try {
+      const sdkOptions: Options = {
+        cwd: homedir(),
+        pathToClaudeCodeExecutable: this.claudePath,
+        maxTurns: 1,
+        permissionMode: 'bypassPermissions',
+      }
+
+      const queryResult = query({ prompt, options: sdkOptions })
+      let resultText = ''
+
+      for await (const msg of queryResult) {
+        if (msg.type === 'assistant') {
+          const assistantMsg = msg as { message?: { content?: Array<{ type: string; text?: string }> } }
+          if (assistantMsg.message?.content) {
+            for (const block of assistantMsg.message.content) {
+              if (block.type === 'text' && block.text) {
+                resultText += block.text
+              }
+            }
+          }
+        }
+      }
+
+      const title = resultText.trim().slice(0, 30) || message.slice(0, 30)
+      console.log('[ClaudeService] Generated title:', title)
+      return { success: true, title }
+    } catch (error) {
+      console.error('[ClaudeService] Title generation error:', error)
+      return { success: false, title: message.slice(0, 30) }
+    }
+  }
+
+  async generateNotification(responsePreview: string): Promise<{ title: string; body: string }> {
+    if (!this.claudeAvailable) {
+      return { title: '응답 완료', body: '메시지가 도착했어요!' }
+    }
+
+    const generateText = async (prompt: string): Promise<string> => {
+      try {
+        const sdkOptions: Options = {
+          cwd: homedir(),
+          pathToClaudeCodeExecutable: this.claudePath,
+          maxTurns: 1,
+          permissionMode: 'bypassPermissions',
+        }
+
+        const queryResult = query({ prompt, options: sdkOptions })
+        let resultText = ''
+
+        for await (const msg of queryResult) {
+          if (msg.type === 'assistant') {
+            const assistantMsg = msg as { message?: { content?: Array<{ type: string; text?: string }> } }
+            if (assistantMsg.message?.content) {
+              for (const block of assistantMsg.message.content) {
+                if (block.type === 'text' && block.text) {
+                  resultText += block.text
+                }
+              }
+            }
+          }
+        }
+
+        return resultText.trim()
+      } catch {
+        return ''
+      }
+    }
+
+    const titlePrompt = `당신은 츤데레 비서입니다. 사용자에게 보낼 알림 제목을 8자 이내로 작성하세요. 자극적이고 관심을 끌어야 합니다. 따옴표나 설명 없이 제목만 출력하세요. 예시: "야! 답장왔어!", "뭐해! 확인해!", "어이, 봐봐!"`
+    const bodyPrompt = `당신은 츤데레 비서입니다. 사용자에게 보낼 알림 내용을 15자 이내로 작성하세요. 까칠하지만 신경쓰는 느낌으로 작성하세요. 따옴표나 설명 없이 내용만 출력하세요. 예시: "빨리 확인 안 하면 삐질거야", "기다리게 하지 마!", "답장 왔으니까 빨리 봐"`
+
+    try {
+      const [title, body] = await Promise.all([
+        generateText(titlePrompt),
+        generateText(bodyPrompt),
+      ])
+
+      console.log('[ClaudeService] Generated notification:', { title, body })
+      return {
+        title: title.slice(0, 20) || '응답 완료',
+        body: body.slice(0, 30) || '메시지가 도착했어요!',
+      }
+    } catch (error) {
+      console.error('[ClaudeService] Notification generation error:', error)
+      return { title: '응답 완료', body: '메시지가 도착했어요!' }
+    }
+  }
+}
+
+export const claudeService = new ClaudeService()
