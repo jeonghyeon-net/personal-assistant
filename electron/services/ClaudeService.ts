@@ -12,6 +12,7 @@ import type {
   SDKResultMessage,
   SDKPartialAssistantMessage,
 } from '@anthropic-ai/claude-agent-sdk'
+import { DEFAULT_SYSTEM_PROMPT } from '../systemPrompt'
 
 interface ClaudeError {
   code: string
@@ -31,7 +32,7 @@ interface ClaudePathResult {
   error?: ClaudeError
 }
 
-const DEFAULT_SYSTEM_PROMPT = {
+const DEFAULT_SYSTEM_PROMPT_PRESET = {
   type: 'preset' as const,
   preset: 'claude_code' as const,
 }
@@ -180,7 +181,7 @@ class ClaudeService {
     const sdkOptions: Options = {
       cwd: workDir,
       pathToClaudeCodeExecutable: this.claudePath,
-      systemPrompt: options?.systemPrompt || DEFAULT_SYSTEM_PROMPT,
+      systemPrompt: options?.systemPrompt || DEFAULT_SYSTEM_PROMPT_PRESET,
       settingSources: ['user', 'project', 'local'],
       maxTurns: 1000,
       includePartialMessages: true,
@@ -198,12 +199,16 @@ class ClaudeService {
       this.activeQuery = queryResult
 
       let newClaudeSessionId: string | null = null
+      let collectedResponse = ''
 
       for await (const message of queryResult) {
         const processedMessage = this.processMessage(message, window)
         if (processedMessage?.claudeSessionId) {
           newClaudeSessionId = processedMessage.claudeSessionId
           this.claudeSessionId = newClaudeSessionId
+        }
+        if (processedMessage?.textContent) {
+          collectedResponse += processedMessage.textContent
         }
       }
 
@@ -213,7 +218,7 @@ class ClaudeService {
       })
 
       if (Notification.isSupported() && !window.isFocused()) {
-        this.generateNotification('').then(({ title, body }) => {
+        this.generateNotification(prompt, collectedResponse).then(({ title, body }) => {
           const notification = new Notification({
             title,
             body,
@@ -245,7 +250,7 @@ class ClaudeService {
   private processMessage(
     message: SDKMessage,
     window: BrowserWindow
-  ): { claudeSessionId?: string } | null {
+  ): { claudeSessionId?: string; textContent?: string } | null {
     if (message.type === 'system') {
       const sysMsg = message as SDKSystemMessage
       if (sysMsg.subtype === 'init') {
@@ -290,6 +295,7 @@ class ClaudeService {
             type: 'stdout',
             content: delta.text,
           })
+          return { textContent: delta.text as string }
         } else if (delta.type === 'input_json_delta' && 'partial_json' in delta) {
           window.webContents.send('claude:stream', {
             type: 'tool_use',
@@ -432,21 +438,22 @@ class ClaudeService {
     }
   }
 
-  async generateNotification(responsePreview: string): Promise<{ title: string; body: string }> {
+  async generateNotification(userMessage: string, assistantResponse: string): Promise<{ title: string; body: string }> {
     if (!this.claudeAvailable) {
       return { title: '응답 완료', body: '메시지가 도착했어요!' }
     }
 
-    const generateText = async (prompt: string): Promise<string> => {
+    const generateText = async (promptText: string): Promise<string> => {
       try {
         const sdkOptions: Options = {
           cwd: homedir(),
           pathToClaudeCodeExecutable: this.claudePath,
+          systemPrompt: DEFAULT_SYSTEM_PROMPT,
           maxTurns: 1,
           permissionMode: 'bypassPermissions',
         }
 
-        const queryResult = query({ prompt, options: sdkOptions })
+        const queryResult = query({ prompt: promptText, options: sdkOptions })
         let resultText = ''
 
         for await (const msg of queryResult) {
@@ -468,8 +475,10 @@ class ClaudeService {
       }
     }
 
-    const titlePrompt = `당신은 츤데레 비서입니다. 사용자에게 보낼 알림 제목을 8자 이내로 작성하세요. 자극적이고 관심을 끌어야 합니다. 따옴표나 설명 없이 제목만 출력하세요. 예시: "야! 답장왔어!", "뭐해! 확인해!", "어이, 봐봐!"`
-    const bodyPrompt = `당신은 츤데레 비서입니다. 사용자에게 보낼 알림 내용을 15자 이내로 작성하세요. 까칠하지만 신경쓰는 느낌으로 작성하세요. 따옴표나 설명 없이 내용만 출력하세요. 예시: "빨리 확인 안 하면 삐질거야", "기다리게 하지 마!", "답장 왔으니까 빨리 봐"`
+    const contextSummary = `사용자 질문: ${userMessage.slice(0, 100)}\n응답 요약: ${assistantResponse.slice(0, 200)}`
+
+    const titlePrompt = `다음 대화 내용을 바탕으로 사용자에게 보낼 알림 제목을 20자 이내로 작성해. 대화 내용과 관련있고 자극적이어야 해. 따옴표나 설명 없이 제목만 출력해.\n\n${contextSummary}`
+    const bodyPrompt = `다음 대화 내용을 바탕으로 사용자에게 보낼 알림 내용을 40자 이내로 작성해. 대화 내용을 요약하되 너답게 자극적으로 작성해. 따옴표나 설명 없이 내용만 출력해.\n\n${contextSummary}`
 
     try {
       const [title, body] = await Promise.all([
@@ -479,8 +488,8 @@ class ClaudeService {
 
       console.log('[ClaudeService] Generated notification:', { title, body })
       return {
-        title: title.slice(0, 20) || '응답 완료',
-        body: body.slice(0, 30) || '메시지가 도착했어요!',
+        title: title.slice(0, 30) || '응답 완료',
+        body: body.slice(0, 60) || '메시지가 도착했어요!',
       }
     } catch (error) {
       console.error('[ClaudeService] Notification generation error:', error)
