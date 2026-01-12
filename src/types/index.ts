@@ -36,6 +36,7 @@ export interface ChatSession {
   title: string
   messages: Message[]
   systemPrompt?: string
+  claudeSessionId?: string
   createdAt: number
   updatedAt: number
 }
@@ -81,6 +82,7 @@ export interface API {
     onStream: (callback: (data: StreamData) => void) => () => void
     abort: () => Promise<boolean>
     resetSession: () => Promise<void>
+    setSessionId: (sessionId: string) => Promise<void>
   }
   window: {
     hide: () => Promise<void>

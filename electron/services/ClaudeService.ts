@@ -425,6 +425,11 @@ class ClaudeService {
     this.claudeSessionId = null
   }
 
+  setSessionId(sessionId: string): void {
+    console.log('[ClaudeService] Setting session ID:', sessionId)
+    this.claudeSessionId = sessionId
+  }
+
   async generateTitle(message: string): Promise<{ success: boolean; title: string }> {
     if (!this.claudeAvailable) {
       return { success: false, title: message.slice(0, 30) }

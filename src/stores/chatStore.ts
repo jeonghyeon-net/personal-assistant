@@ -36,7 +36,7 @@ interface ChatActions {
   clearChat: () => void
   loadSessions: () => Promise<void>
   saveCurrentSession: () => Promise<void>
-  loadSession: (session: ChatSession) => void
+  loadSession: (session: ChatSession) => Promise<void>
   deleteSession: (sessionId: string) => Promise<void>
   setSystemPrompt: (prompt: string) => void
   generateTitle: (message: string) => Promise<void>
@@ -214,10 +214,13 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     set({ inputValue: '' })
 
     try {
-      await window.api.claude.execute(content, {
+      const newClaudeSessionId = await window.api.claude.execute(content, {
         maxThinkingTokens: 32000,
         systemPrompt: state.systemPrompt || undefined,
       })
+      if (newClaudeSessionId) {
+        set({ claudeSessionId: newClaudeSessionId })
+      }
     } catch (error) {
       set({ error: error instanceof Error ? error.message : String(error) })
       get().stopStreaming()
@@ -241,6 +244,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     set({
       sessionId: createNewSessionId(),
       messages: [],
+      claudeSessionId: null,
       currentStreamContent: '',
       streamingBlocks: [],
       streamingMessageId: null,
@@ -267,6 +271,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       title,
       messages: state.messages.filter((m) => !m.isStreaming),
       systemPrompt: state.systemPrompt,
+      claudeSessionId: state.claudeSessionId ?? undefined,
       createdAt: state.messages[0]?.timestamp || Date.now(),
       updatedAt: Date.now(),
     }
@@ -275,16 +280,24 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     await get().loadSessions()
   },
 
-  loadSession: (session) => {
+  loadSession: async (session) => {
     const state = get()
     if (state.isStreaming) {
       get().abortMessage()
     }
-    window.api.claude.resetSession()
+    if (state.messages.length > 0) {
+      await get().saveCurrentSession()
+    }
+    if (session.claudeSessionId) {
+      window.api.claude.setSessionId(session.claudeSessionId)
+    } else {
+      window.api.claude.resetSession()
+    }
     set({
       sessionId: session.id,
       messages: session.messages,
       systemPrompt: session.systemPrompt || '',
+      claudeSessionId: session.claudeSessionId ?? null,
       currentStreamContent: '',
       streamingBlocks: [],
       streamingMessageId: null,

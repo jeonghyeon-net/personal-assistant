@@ -57,6 +57,9 @@ const api = {
 
     resetSession: (): Promise<void> =>
       ipcRenderer.invoke('claude:reset-session'),
+
+    setSessionId: (sessionId: string): Promise<void> =>
+      ipcRenderer.invoke('claude:set-session-id', sessionId),
   },
 
   window: {

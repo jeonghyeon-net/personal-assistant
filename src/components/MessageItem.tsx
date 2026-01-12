@@ -7,31 +7,36 @@ import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import type { Message, ContentBlock } from '../types'
 
 const Wrap = styled.div<{ $isUser: boolean }>`
-  padding: 4px 14px;
+  padding: 3px 12px;
   display: flex;
   justify-content: ${({ $isUser }) => ($isUser ? 'flex-end' : 'flex-start')};
 `
 
-const Bubble = styled.div<{ $isUser: boolean }>`
+const slideIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`
+
+const Bubble = styled.div<{ $isUser: boolean; $isStreaming?: boolean }>`
   max-width: 88%;
-  padding: 10px 14px;
-  border-radius: 16px;
-  border-bottom-left-radius: ${({ $isUser }) => ($isUser ? '16px' : '4px')};
-  border-bottom-right-radius: ${({ $isUser }) => ($isUser ? '4px' : '16px')};
+  padding: 6px 10px;
+  border-radius: 4px;
   background: ${({ $isUser }) =>
-    $isUser
-      ? 'linear-gradient(135deg, #0A84FF 0%, #0066CC 100%)'
-      : 'rgba(255,255,255,0.06)'};
-  color: rgba(255, 255, 255, 0.95);
-  font-size: 13px;
-  line-height: 1.55;
+    $isUser ? '#0A84FF' : 'rgba(255,255,255,0.08)'};
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 12px;
+  line-height: 1.4;
   overflow-wrap: break-word;
   word-break: break-word;
-  backdrop-filter: blur(10px);
-  box-shadow: ${({ $isUser }) =>
-    $isUser
-      ? '0 2px 12px rgba(10, 132, 255, 0.3)'
-      : '0 1px 8px rgba(0, 0, 0, 0.2)'};
+  animation: ${slideIn} 0.25s ease-out;
+  animation-delay: ${({ $isStreaming }) => ($isStreaming ? '0.3s' : '0s')};
+  animation-fill-mode: backwards;
 `
 
 const markdownStyles = css`
@@ -257,50 +262,73 @@ const Cursor = styled.span`
   border-radius: 1px;
 `
 
+const typing = keyframes`
+  0%, 20% { opacity: 0.3; }
+  50% { opacity: 1; }
+  80%, 100% { opacity: 0.3; }
+`
+
+const TypingDots = styled.span`
+  display: inline-flex;
+  gap: 3px;
+
+  span {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    animation: ${typing} 1.2s ease-in-out infinite;
+
+    &:nth-child(2) { animation-delay: 0.2s; }
+    &:nth-child(3) { animation-delay: 0.4s; }
+  }
+`
+
 const Toggle = styled.details`
-  margin: 6px 0;
-  font-size: 11px;
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 6px;
-  overflow: hidden;
+  margin: 2px 0;
+  font-size: 10px;
 
   summary {
     cursor: pointer;
-    padding: 6px 10px;
-    color: rgba(255, 255, 255, 0.5);
+    padding: 2px 0;
+    color: rgba(255, 255, 255, 0.35);
     user-select: none;
-    transition: all 0.2s ease;
+    list-style: none;
 
-    &:hover {
-      color: rgba(255, 255, 255, 0.75);
-      background: rgba(255, 255, 255, 0.03);
+    &::-webkit-details-marker {
+      display: none;
     }
 
-    &::marker {
-      color: rgba(255, 255, 255, 0.3);
+    &::before {
+      content: '▸ ';
+      font-size: 8px;
+    }
+
+    &:hover {
+      color: rgba(255, 255, 255, 0.55);
     }
   }
 
-  &[open] summary {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  &[open] summary::before {
+    content: '▾ ';
   }
 `
 
 const ToggleContent = styled.div`
-  padding: 8px 10px;
+  padding: 4px 0 4px 10px;
   font-family: 'SF Mono', 'Fira Code', Menlo, monospace;
-  font-size: 10px;
+  font-size: 9px;
   white-space: pre-wrap;
-  max-height: 120px;
+  max-height: 80px;
   overflow-y: auto;
-  color: rgba(255, 255, 255, 0.55);
-  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1.4;
 
   &::-webkit-scrollbar {
-    width: 4px;
+    width: 3px;
   }
   &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 2px;
   }
 `
@@ -432,22 +460,27 @@ export function MessageItem({
 
   return (
     <Wrap $isUser={isUser}>
-      <Bubble $isUser={isUser}>
+      <Bubble $isUser={isUser} $isStreaming={message.isStreaming}>
         {isUser ? (
           content
         ) : message.isStreaming ? (
-          <>
-            {nonText.map((b, i) => (
-              <Block key={i} block={b} />
-            ))}
-            <span style={{ whiteSpace: 'pre-wrap' }}>{content}</span>
-            <Cursor />
-          </>
+          content || nonText.length > 0 ? (
+            <>
+              <span style={{ whiteSpace: 'pre-wrap' }}>{content}</span>
+              <Cursor />
+              {nonText.length > 0 && nonText.map((b, i) => (
+                <Block key={i} block={b} />
+              ))}
+            </>
+          ) : (
+            <TypingDots>
+              <span />
+              <span />
+              <span />
+            </TypingDots>
+          )
         ) : (
           <>
-            {nonText.map((b, i) => (
-              <Block key={i} block={b} />
-            ))}
             {text.trim() && (
               <MarkdownContent>
                 <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
@@ -455,6 +488,9 @@ export function MessageItem({
                 </ReactMarkdown>
               </MarkdownContent>
             )}
+            {nonText.length > 0 && nonText.map((b, i) => (
+              <Block key={i} block={b} />
+            ))}
           </>
         )}
       </Bubble>

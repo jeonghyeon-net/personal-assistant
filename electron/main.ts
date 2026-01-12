@@ -19,6 +19,7 @@ interface ChatSession {
   title: string
   messages: unknown[]
   systemPrompt?: string
+  claudeSessionId?: string
   createdAt: number
   updatedAt: number
 }
@@ -166,6 +167,10 @@ ipcMain.handle('claude:abort', async () => {
 
 ipcMain.handle('claude:reset-session', () => {
   claudeService.resetSession()
+})
+
+ipcMain.handle('claude:set-session-id', (_event, sessionId: string) => {
+  claudeService.setSessionId(sessionId)
 })
 
 ipcMain.handle('window:hide', () => {
