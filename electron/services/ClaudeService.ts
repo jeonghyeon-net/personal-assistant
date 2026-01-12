@@ -1,8 +1,23 @@
 import { BrowserWindow, Notification } from 'electron'
 import { execSync } from 'child_process'
-import { existsSync, readdirSync } from 'fs'
-import { join } from 'path'
+import { existsSync, readdirSync, appendFileSync } from 'fs'
+import { join, dirname } from 'path'
 import { homedir, platform } from 'os'
+
+const logFile = join(homedir(), 'pa-debug.log')
+const log = (msg: string) => {
+  const timestamp = new Date().toISOString()
+  appendFileSync(logFile, `[${timestamp}] ${msg}\n`)
+}
+
+function addClaudePathToEnv(claudePath: string): void {
+  const dir = dirname(claudePath)
+  const currentPath = process.env.PATH || ''
+  if (!currentPath.split(':').includes(dir)) {
+    process.env.PATH = dir + ':' + currentPath
+    log('[ClaudeService] Added to PATH: ' + dir)
+  }
+}
 import { query } from '@anthropic-ai/claude-agent-sdk'
 import type {
   Query,
@@ -87,12 +102,14 @@ function findClaudePath(): ClaudePathResult {
 
   const commonPaths = [...staticPaths, ...getDynamicPaths()]
 
+  log('[findClaudePath] Checking common paths: ' + commonPaths.length + ' paths')
   for (const candidatePath of commonPaths) {
     if (existsSync(candidatePath)) {
-      console.log('[findClaudePath] Found at common path:', candidatePath)
+      log('[findClaudePath] Found at common path: ' + candidatePath)
       return { found: true, path: candidatePath }
     }
   }
+  log('[findClaudePath] No common path found')
 
   const tryFindClaude = (command: string): string | null => {
     console.log('[findClaudePath] Trying command:', command)
@@ -152,6 +169,10 @@ class ClaudeService {
     this.claudeAvailable = pathResult.found
     this.claudeError = pathResult.error
     console.log('[ClaudeService] Claude path:', this.claudePath, 'available:', this.claudeAvailable)
+
+    if (pathResult.found) {
+      addClaudePathToEnv(this.claudePath)
+    }
   }
 
   checkAvailability(): ClaudeAvailability {
@@ -176,6 +197,8 @@ class ClaudeService {
       systemPrompt?: string
     }
   ): Promise<string | null> {
+    log('[ClaudeService] execute called, claudePath: ' + this.claudePath + ', available: ' + this.claudeAvailable)
+    log('[ClaudeService] Current PATH: ' + process.env.PATH)
     console.log('[ClaudeService] Starting execution with prompt:', prompt.substring(0, 100))
 
     const sdkOptions: Options = {
@@ -191,10 +214,12 @@ class ClaudeService {
     }
 
     try {
+      log('[ClaudeService] Calling query() with path: ' + sdkOptions.pathToClaudeCodeExecutable)
       const queryResult = query({
         prompt,
         options: sdkOptions,
       })
+      log('[ClaudeService] query() returned, iterating...')
 
       this.activeQuery = queryResult
 
@@ -237,6 +262,8 @@ class ClaudeService {
       this.activeQuery = null
       return newClaudeSessionId
     } catch (error) {
+      log('[ClaudeService] Query error: ' + (error instanceof Error ? error.message : String(error)))
+      log('[ClaudeService] Error stack: ' + (error instanceof Error ? error.stack : 'N/A'))
       console.error('[ClaudeService] Query error:', error)
       window.webContents.send('claude:stream', {
         type: 'error',
