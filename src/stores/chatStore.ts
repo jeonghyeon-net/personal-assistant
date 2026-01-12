@@ -168,12 +168,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         set({ systemPrompt })
       }
       await get().loadSessions()
-
-      const lastClaudeSessionId = await window.api.config.get<string>('lastClaudeSessionId')
-      if (lastClaudeSessionId) {
-        window.api.claude.setSessionId(lastClaudeSessionId)
-        set({ claudeSessionId: lastClaudeSessionId })
-      }
     } catch (error) {
       console.error('[ChatStore] Failed to check Claude availability:', error)
       set({ claudeAvailable: false })
