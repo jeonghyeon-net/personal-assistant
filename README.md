@@ -2,6 +2,8 @@
 
 macOS 메뉴바에서 Claude Code와 대화할 수 있는 앱
 
+<img width="492" height="912" alt="스크린샷 2026-01-12 09 22 08" src="https://github.com/user-attachments/assets/9d52b4b2-2084-495f-a65b-e4d1d7fd1ad9" />
+
 ## 기능
 
 - 메뉴바 트레이 아이콘 클릭으로 채팅창 열기/닫기
