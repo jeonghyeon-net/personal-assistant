@@ -25,7 +25,7 @@ const slideIn = keyframes`
   }
 `
 
-const Bubble = styled.div<{ $isUser: boolean; $isStreaming?: boolean }>`
+const Bubble = styled.div<{ $isUser: boolean }>`
   width: ${({ $isUser }) => ($isUser ? 'auto' : '85%')};
   max-width: 85%;
   padding: 6px 10px;
@@ -37,11 +37,7 @@ const Bubble = styled.div<{ $isUser: boolean; $isStreaming?: boolean }>`
   line-height: 1.4;
   overflow-wrap: break-word;
   word-break: break-word;
-  ${({ $isStreaming }) =>
-    !$isStreaming &&
-    css`
-      animation: ${slideIn} 0.25s ease-out;
-    `}
+  animation: ${slideIn} 0.25s ease-out;
   user-select: text;
   cursor: text;
 `
@@ -507,27 +503,33 @@ export function MessageItem({
     })
   }
 
+  const showTypingOnly = message.isStreaming && !content && (!blocks || blocks.length === 0)
+
+  if (showTypingOnly) {
+    return (
+      <Wrap $isUser={false}>
+        <TypingDots>
+          <span />
+          <span />
+          <span />
+        </TypingDots>
+      </Wrap>
+    )
+  }
+
   return (
     <Wrap $isUser={isUser}>
-      <Bubble $isUser={isUser} $isStreaming={message.isStreaming}>
+      <Bubble $isUser={isUser}>
         {isUser ? (
           renderUserContent(content)
         ) : message.isStreaming ? (
-          (content || (blocks && blocks.length > 0)) ? (
-            <>
-              {renderBlocks()}
-              {content && !blocks?.some(b => b.type === 'text') && (
-                <span style={{ whiteSpace: 'pre-wrap' }}>{content}</span>
-              )}
-              <Cursor />
-            </>
-          ) : (
-            <TypingDots>
-              <span />
-              <span />
-              <span />
-            </TypingDots>
-          )
+          <>
+            {renderBlocks()}
+            {content && !blocks?.some(b => b.type === 'text') && (
+              <span style={{ whiteSpace: 'pre-wrap' }}>{content}</span>
+            )}
+            <Cursor />
+          </>
         ) : (
           renderBlocks()
         )}
