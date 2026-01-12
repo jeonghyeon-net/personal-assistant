@@ -157,7 +157,6 @@ ipcMain.handle('claude:check-availability', () => {
 ipcMain.handle('claude:execute', async (_event, prompt: string, options?: {
   maxThinkingTokens?: number
   systemPrompt?: string
-  conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>
 }) => {
   if (!mainWindow) return null
   const workDir = getWorkDir()

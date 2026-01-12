@@ -70,15 +70,9 @@ export interface ClaudeAvailability {
   }
 }
 
-export interface ConversationMessage {
-  role: 'user' | 'assistant'
-  content: string
-}
-
 export interface ExecuteOptions {
   maxThinkingTokens?: number
   systemPrompt?: string
-  conversationHistory?: ConversationMessage[]
 }
 
 export interface API {

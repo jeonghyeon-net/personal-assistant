@@ -168,6 +168,12 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         set({ systemPrompt })
       }
       await get().loadSessions()
+
+      const lastClaudeSessionId = await window.api.config.get<string>('lastClaudeSessionId')
+      if (lastClaudeSessionId) {
+        window.api.claude.setSessionId(lastClaudeSessionId)
+        set({ claudeSessionId: lastClaudeSessionId })
+      }
     } catch (error) {
       console.error('[ChatStore] Failed to check Claude availability:', error)
       set({ claudeAvailable: false })
@@ -187,7 +193,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     }
 
     const isFirstMessage = state.messages.length === 0
-    const existingMessages = state.messages.filter((m) => !m.isStreaming)
 
     const userMessage: Message = {
       id: uuidv4(),
@@ -218,10 +223,10 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       const newClaudeSessionId = await window.api.claude.execute(content, {
         maxThinkingTokens: 32000,
         systemPrompt: state.systemPrompt || undefined,
-        conversationHistory: existingMessages.length > 0 ? existingMessages : undefined,
       })
       if (newClaudeSessionId) {
         set({ claudeSessionId: newClaudeSessionId })
+        window.api.config.set('lastClaudeSessionId', newClaudeSessionId)
       }
     } catch (error) {
       set({ error: error instanceof Error ? error.message : String(error) })
@@ -292,8 +297,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     }
     if (session.claudeSessionId) {
       window.api.claude.setSessionId(session.claudeSessionId)
-    } else {
-      window.api.claude.resetSession()
+      window.api.config.set('lastClaudeSessionId', session.claudeSessionId)
     }
     set({
       sessionId: session.id,
