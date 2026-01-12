@@ -187,6 +187,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     }
 
     const isFirstMessage = state.messages.length === 0
+    const existingMessages = state.messages.filter((m) => !m.isStreaming)
 
     const userMessage: Message = {
       id: uuidv4(),
@@ -217,6 +218,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       const newClaudeSessionId = await window.api.claude.execute(content, {
         maxThinkingTokens: 32000,
         systemPrompt: state.systemPrompt || undefined,
+        conversationHistory: existingMessages.length > 0 ? existingMessages : undefined,
       })
       if (newClaudeSessionId) {
         set({ claudeSessionId: newClaudeSessionId })

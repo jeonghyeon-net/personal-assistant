@@ -195,11 +195,25 @@ class ClaudeService {
     options?: {
       maxThinkingTokens?: number
       systemPrompt?: string
+      conversationHistory?: Array<{ role: 'user' | 'assistant'; content: string }>
     }
   ): Promise<string | null> {
     log('[ClaudeService] execute called, claudePath: ' + this.claudePath + ', available: ' + this.claudeAvailable)
     log('[ClaudeService] Current PATH: ' + process.env.PATH)
     console.log('[ClaudeService] Starting execution with prompt:', prompt.substring(0, 100))
+
+    let finalPrompt = prompt
+    const conversationHistory = options?.conversationHistory ?? []
+    const hasHistory = conversationHistory.length > 0
+    const canResume = this.claudeSessionId && !hasHistory
+
+    if (hasHistory && !this.claudeSessionId) {
+      const historyContext = conversationHistory
+        .map((msg) => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
+        .join('\n\n')
+      finalPrompt = `[이전 대화 기록]\n${historyContext}\n\n[현재 메시지]\nUser: ${prompt}`
+      log('[ClaudeService] Using conversation history as context, messages: ' + conversationHistory.length)
+    }
 
     const sdkOptions: Options = {
       cwd: workDir,
@@ -209,14 +223,14 @@ class ClaudeService {
       maxTurns: 1000,
       includePartialMessages: true,
       permissionMode: 'bypassPermissions',
-      resume: this.claudeSessionId ?? undefined,
+      resume: canResume ? this.claudeSessionId ?? undefined : undefined,
       maxThinkingTokens: options?.maxThinkingTokens,
     }
 
     try {
       log('[ClaudeService] Calling query() with path: ' + sdkOptions.pathToClaudeCodeExecutable)
       const queryResult = query({
-        prompt,
+        prompt: finalPrompt,
         options: sdkOptions,
       })
       log('[ClaudeService] query() returned, iterating...')

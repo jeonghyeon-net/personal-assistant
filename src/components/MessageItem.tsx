@@ -37,9 +37,13 @@ const Bubble = styled.div<{ $isUser: boolean; $isStreaming?: boolean }>`
   line-height: 1.4;
   overflow-wrap: break-word;
   word-break: break-word;
-  animation: ${slideIn} 0.25s ease-out;
-  animation-delay: ${({ $isStreaming }) => ($isStreaming ? '0.3s' : '0s')};
-  animation-fill-mode: backwards;
+  ${({ $isStreaming }) =>
+    !$isStreaming &&
+    css`
+      animation: ${slideIn} 0.25s ease-out;
+    `}
+  user-select: text;
+  cursor: text;
 `
 
 const markdownStyles = css`
