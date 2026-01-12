@@ -9,6 +9,8 @@ import type { Message, ContentBlock } from '../types'
 const Wrap = styled.div<{ $isUser: boolean }>`
   padding: 3px 12px;
   display: flex;
+  width: 100%;
+  box-sizing: border-box;
   justify-content: ${({ $isUser }) => ($isUser ? 'flex-end' : 'flex-start')};
 `
 
@@ -24,7 +26,8 @@ const slideIn = keyframes`
 `
 
 const Bubble = styled.div<{ $isUser: boolean; $isStreaming?: boolean }>`
-  max-width: 88%;
+  width: ${({ $isUser }) => ($isUser ? 'auto' : '85%')};
+  max-width: 85%;
   padding: 6px 10px;
   border-radius: 4px;
   background: ${({ $isUser }) =>
@@ -419,12 +422,6 @@ export function MessageItem({
   const isUser = message.role === 'user'
   const content = message.isStreaming ? (streamContent ?? '') : message.content
   const blocks = message.isStreaming ? streamingBlocks : message.blocks
-  const nonText = blocks?.filter((b) => b.type !== 'text') ?? []
-  const text =
-    blocks
-      ?.filter((b) => b.type === 'text')
-      .map((b) => b.content)
-      .join('\n') || content
 
   const handleLinkClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -458,19 +455,67 @@ export function MessageItem({
     },
   }
 
+  const renderBlocks = (): React.ReactNode => {
+    if (!blocks || blocks.length === 0) {
+      if (content) {
+        return (
+          <MarkdownContent>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+              {content}
+            </ReactMarkdown>
+          </MarkdownContent>
+        )
+      }
+      return null
+    }
+
+    return blocks.map((block, i) => {
+      if (block.type === 'text') {
+        return block.content.trim() ? (
+          <MarkdownContent key={i}>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+              {block.content}
+            </ReactMarkdown>
+          </MarkdownContent>
+        ) : null
+      }
+      return <Block key={i} block={block} />
+    })
+  }
+
+  const renderUserContent = (text: string): React.ReactNode => {
+    const urlRegex = /(https?:\/\/[^\s]+)/g
+    const parts = text.split(urlRegex)
+    return parts.map((part, i) => {
+      if (urlRegex.test(part)) {
+        return (
+          <a
+            key={i}
+            href={part}
+            onClick={(e) => handleLinkClick(e, part)}
+            style={{ color: '#fff', textDecoration: 'underline', cursor: 'pointer' }}
+          >
+            {part}
+          </a>
+        )
+      }
+      return part
+    })
+  }
+
   return (
     <Wrap $isUser={isUser}>
       <Bubble $isUser={isUser} $isStreaming={message.isStreaming}>
         {isUser ? (
-          content
+          renderUserContent(content)
         ) : message.isStreaming ? (
-          content || nonText.length > 0 ? (
+          (content || (blocks && blocks.length > 0)) ? (
             <>
-              <span style={{ whiteSpace: 'pre-wrap' }}>{content}</span>
+              {renderBlocks()}
+              {content && !blocks?.some(b => b.type === 'text') && (
+                <span style={{ whiteSpace: 'pre-wrap' }}>{content}</span>
+              )}
               <Cursor />
-              {nonText.length > 0 && nonText.map((b, i) => (
-                <Block key={i} block={b} />
-              ))}
             </>
           ) : (
             <TypingDots>
@@ -480,18 +525,7 @@ export function MessageItem({
             </TypingDots>
           )
         ) : (
-          <>
-            {text.trim() && (
-              <MarkdownContent>
-                <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-                  {text}
-                </ReactMarkdown>
-              </MarkdownContent>
-            )}
-            {nonText.length > 0 && nonText.map((b, i) => (
-              <Block key={i} block={b} />
-            ))}
-          </>
+          renderBlocks()
         )}
       </Bubble>
     </Wrap>

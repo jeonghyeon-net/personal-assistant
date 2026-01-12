@@ -309,8 +309,12 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   },
 
   deleteSession: async (sessionId) => {
+    const state = get()
     await window.api.sessions.delete(sessionId)
     await get().loadSessions()
+    if (state.sessionId === sessionId) {
+      get().clearChat()
+    }
   },
 
   setSystemPrompt: (prompt) => {

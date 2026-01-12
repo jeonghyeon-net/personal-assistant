@@ -65,6 +65,8 @@ const api = {
   window: {
     hide: (): Promise<void> => ipcRenderer.invoke('window:hide'),
     quit: (): Promise<void> => ipcRenderer.invoke('app:quit'),
+    toggleSize: (expanded: boolean): Promise<void> => ipcRenderer.invoke('window:toggle-size', expanded),
+    getExpanded: (): Promise<boolean> => ipcRenderer.invoke('window:get-expanded'),
     onFocus: (callback: () => void): (() => void) => {
       const handler = (): void => callback()
       ipcRenderer.on('window:focus', handler)

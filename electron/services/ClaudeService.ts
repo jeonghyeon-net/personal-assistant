@@ -431,11 +431,15 @@ class ClaudeService {
   }
 
   async generateTitle(message: string): Promise<{ success: boolean; title: string }> {
+    const messageWithoutUrls = message.replace(/https?:\/\/[^\s]+/g, '').trim()
+    const fallbackTitle = (messageWithoutUrls || message).slice(0, 30)
+
     if (!this.claudeAvailable) {
-      return { success: false, title: message.slice(0, 30) }
+      return { success: false, title: fallbackTitle }
     }
 
-    const prompt = `다음 메시지의 핵심 주제를 한국어로 10자 이내로 요약해줘. 따옴표나 설명 없이 제목만 출력해:\n\n${message}`
+    const textForTitle = messageWithoutUrls || message
+    const prompt = `다음 메시지의 핵심 주제를 한국어로 10자 이내로 요약해줘. 따옴표나 설명 없이 제목만 출력해:\n\n${textForTitle}`
 
     try {
       const sdkOptions: Options = {
@@ -461,12 +465,12 @@ class ClaudeService {
         }
       }
 
-      const title = resultText.trim().slice(0, 30) || message.slice(0, 30)
+      const title = resultText.trim().slice(0, 30) || fallbackTitle
       console.log('[ClaudeService] Generated title:', title)
       return { success: true, title }
     } catch (error) {
       console.error('[ClaudeService] Title generation error:', error)
-      return { success: false, title: message.slice(0, 30) }
+      return { success: false, title: fallbackTitle }
     }
   }
 

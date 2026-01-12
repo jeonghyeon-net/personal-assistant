@@ -87,6 +87,8 @@ export interface API {
   window: {
     hide: () => Promise<void>
     quit: () => Promise<void>
+    toggleSize: (expanded: boolean) => Promise<void>
+    getExpanded: () => Promise<boolean>
     onFocus: (callback: () => void) => () => void
   }
   shell: {

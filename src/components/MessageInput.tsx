@@ -27,7 +27,8 @@ const TextArea = styled.textarea`
   outline: none;
   height: 20px;
   max-height: 80px;
-  padding: 4px 0;
+  padding: 3px 0;
+  margin: 1px 0;
 
   &::placeholder {
     color: rgba(255,255,255,0.3);

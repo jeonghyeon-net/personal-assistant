@@ -30,6 +30,7 @@ interface StoreSchema {
   systemPrompt: string
   sessions: ChatSession[]
   openAtLogin: boolean
+  windowExpanded: boolean
 }
 
 const store = new Store<StoreSchema>({
@@ -39,6 +40,7 @@ const store = new Store<StoreSchema>({
     systemPrompt: DEFAULT_SYSTEM_PROMPT,
     sessions: [],
     openAtLogin: false,
+    windowExpanded: false,
   },
 })
 
@@ -175,6 +177,35 @@ ipcMain.handle('claude:set-session-id', (_event, sessionId: string) => {
 
 ipcMain.handle('window:hide', () => {
   mainWindow?.hide()
+})
+
+function applyWindowSize(expanded: boolean): void {
+  if (!mainWindow) return
+  const trayBounds = tray?.getBounds()
+  if (expanded) {
+    mainWindow.setMinimumSize(600, 500)
+    mainWindow.setMaximumSize(600, 900)
+    mainWindow.setSize(600, 750)
+  } else {
+    mainWindow.setMinimumSize(380, 300)
+    mainWindow.setMaximumSize(380, 800)
+    mainWindow.setSize(380, 420)
+  }
+  if (trayBounds) {
+    const windowBounds = mainWindow.getBounds()
+    const x = Math.round(trayBounds.x + trayBounds.width / 2 - windowBounds.width / 2)
+    const y = Math.round(trayBounds.y + trayBounds.height)
+    mainWindow.setPosition(x, y)
+  }
+}
+
+ipcMain.handle('window:toggle-size', (_event, expanded: boolean) => {
+  store.set('windowExpanded', expanded)
+  applyWindowSize(expanded)
+})
+
+ipcMain.handle('window:get-expanded', () => {
+  return store.get('windowExpanded')
 })
 
 ipcMain.handle('app:quit', () => {
