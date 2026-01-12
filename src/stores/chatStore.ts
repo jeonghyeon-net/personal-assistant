@@ -248,6 +248,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
   clearChat: () => {
     window.api.claude.resetSession()
+    window.api.config.set('lastClaudeSessionId', null)
     set({
       sessionId: createNewSessionId(),
       messages: [],
