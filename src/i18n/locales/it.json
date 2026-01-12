@@ -21,6 +21,10 @@
       "reset": "Ripristina",
       "help": "Clicca e inserisci nuova scorciatoia · ESC per annullare · × per ripristinare (⌥ Space)"
     },
+    "newChatShortcut": {
+      "label": "Scorciatoia nuova chat",
+      "help": "Clicca e inserisci nuova scorciatoia · ESC per annullare · × per ripristinare (⌘ N)"
+    },
     "systemPrompt": {
       "label": "Prompt di sistema",
       "placeholder": "Imposta la personalità dell'IA...",

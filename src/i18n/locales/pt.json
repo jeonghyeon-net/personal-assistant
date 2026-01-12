@@ -21,6 +21,10 @@
       "reset": "Redefinir",
       "help": "Clique e digite novo atalho · ESC para cancelar · × para restaurar (⌥ Space)"
     },
+    "newChatShortcut": {
+      "label": "Atalho nova conversa",
+      "help": "Clique e digite novo atalho · ESC para cancelar · × para restaurar (⌘ N)"
+    },
     "systemPrompt": {
       "label": "Prompt do sistema",
       "placeholder": "Defina a personalidade da IA...",

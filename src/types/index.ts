@@ -91,6 +91,9 @@ export interface API {
     getExpanded: () => Promise<boolean>
     onFocus: (callback: () => void) => () => void
   }
+  chat: {
+    onNewChat: (callback: () => void) => () => void
+  }
   shell: {
     openExternal: (url: string) => Promise<void>
   }
@@ -98,6 +101,7 @@ export interface API {
     get: <T = unknown>(key: string) => Promise<T>
     set: (key: string, value: unknown) => Promise<void>
     setShortcut: (shortcut: string) => Promise<{ success: boolean; error?: string }>
+    setNewChatShortcut: (shortcut: string) => Promise<{ success: boolean; error?: string }>
     setOpenAtLogin: (enabled: boolean) => Promise<{ success: boolean }>
   }
   sessions: {

@@ -240,15 +240,19 @@ interface Props {
   onBack: () => void
 }
 
+type ShortcutType = 'global' | 'newChat' | null
+
 export function SettingsContainer({ onBack }: Props): React.ReactElement {
   const { t, i18n } = useTranslation()
   const [shortcut, setShortcut] = useState('Alt+Space')
-  const [isRecording, setIsRecording] = useState(false)
+  const [newChatShortcut, setNewChatShortcut] = useState('CommandOrControl+N')
+  const [recordingType, setRecordingType] = useState<ShortcutType>(null)
   const [pressedModifiers, setPressedModifiers] = useState<Set<string>>(new Set())
   const [openAtLogin, setOpenAtLogin] = useState(false)
-  const recordingRef = useRef(false)
+  const recordingTypeRef = useRef<ShortcutType>(null)
   const modifiersRef = useRef<Set<string>>(new Set())
-  const buttonRef = useRef<HTMLButtonElement>(null)
+  const globalButtonRef = useRef<HTMLButtonElement>(null)
+  const newChatButtonRef = useRef<HTMLButtonElement>(null)
 
   const systemPrompt = useChatStore((state) => state.systemPrompt)
   const setSystemPrompt = useChatStore((state) => state.setSystemPrompt)
@@ -268,6 +272,8 @@ export function SettingsContainer({ onBack }: Props): React.ReactElement {
     const loadSettings = async (): Promise<void> => {
       const savedShortcut = await window.api.config.get<string>('globalShortcut')
       if (savedShortcut) setShortcut(savedShortcut)
+      const savedNewChatShortcut = await window.api.config.get<string>('newChatShortcut')
+      if (savedNewChatShortcut) setNewChatShortcut(savedNewChatShortcut)
       const savedOpenAtLogin = await window.api.config.get<boolean>('openAtLogin')
       setOpenAtLogin(savedOpenAtLogin ?? false)
     }
@@ -280,8 +286,8 @@ export function SettingsContainer({ onBack }: Props): React.ReactElement {
   }
 
   useEffect(() => {
-    recordingRef.current = isRecording
-  }, [isRecording])
+    recordingTypeRef.current = recordingType
+  }, [recordingType])
 
   useEffect(() => {
     modifiersRef.current = pressedModifiers
@@ -289,10 +295,12 @@ export function SettingsContainer({ onBack }: Props): React.ReactElement {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent): void => {
-      if (!recordingRef.current) return
+      if (!recordingTypeRef.current) return
       const target = event.target as HTMLElement
-      if (buttonRef.current && !buttonRef.current.contains(target)) {
-        setIsRecording(false)
+      const isInGlobalButton = globalButtonRef.current?.contains(target)
+      const isInNewChatButton = newChatButtonRef.current?.contains(target)
+      if (!isInGlobalButton && !isInNewChatButton) {
+        setRecordingType(null)
         setPressedModifiers(new Set())
       }
     }
@@ -302,12 +310,12 @@ export function SettingsContainer({ onBack }: Props): React.ReactElement {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
-      if (!recordingRef.current) return
+      if (!recordingTypeRef.current) return
       event.preventDefault()
       event.stopPropagation()
 
       if (event.key === 'Escape') {
-        setIsRecording(false)
+        setRecordingType(null)
         setPressedModifiers(new Set())
         return
       }
@@ -319,14 +327,14 @@ export function SettingsContainer({ onBack }: Props): React.ReactElement {
 
       if (modifiersRef.current.size > 0) {
         const newShortcut = formatShortcutForElectron(modifiersRef.current, event.key)
-        saveShortcut(newShortcut)
-        setIsRecording(false)
+        saveShortcut(newShortcut, recordingTypeRef.current)
+        setRecordingType(null)
         setPressedModifiers(new Set())
       }
     }
 
     const handleKeyUp = (event: KeyboardEvent): void => {
-      if (!recordingRef.current) return
+      if (!recordingTypeRef.current) return
       if (MODIFIER_KEYS.has(event.key)) {
         setPressedModifiers((prev) => {
           const next = new Set(prev)
@@ -344,25 +352,36 @@ export function SettingsContainer({ onBack }: Props): React.ReactElement {
     }
   }, [])
 
-  const saveShortcut = async (newShortcut: string): Promise<void> => {
-    const result = await window.api.config.setShortcut(newShortcut)
-    if (result.success) {
-      setShortcut(newShortcut)
+  const saveShortcut = async (newShortcut: string, type: 'global' | 'newChat'): Promise<void> => {
+    if (type === 'global') {
+      const result = await window.api.config.setShortcut(newShortcut)
+      if (result.success) {
+        setShortcut(newShortcut)
+      }
+    } else {
+      const result = await window.api.config.setNewChatShortcut(newShortcut)
+      if (result.success) {
+        setNewChatShortcut(newShortcut)
+      }
     }
   }
 
-  const handleClear = (event: React.MouseEvent): void => {
+  const handleClear = (event: React.MouseEvent, type: 'global' | 'newChat'): void => {
     event.stopPropagation()
-    saveShortcut('Alt+Space')
-    setIsRecording(false)
+    const defaultValue = type === 'global' ? 'Alt+Space' : 'CommandOrControl+N'
+    saveShortcut(defaultValue, type)
+    setRecordingType(null)
     setPressedModifiers(new Set())
   }
 
-  const displayValue = isRecording
-    ? pressedModifiers.size > 0
-      ? Array.from(pressedModifiers).map((key) => KEY_DISPLAY_MAP[key] ?? key).join(' ')
-      : t('settings.shortcut.waiting')
-    : formatShortcutForDisplay(shortcut)
+  const getDisplayValue = (type: 'global' | 'newChat'): string => {
+    if (recordingType === type) {
+      return pressedModifiers.size > 0
+        ? Array.from(pressedModifiers).map((key) => KEY_DISPLAY_MAP[key] ?? key).join(' ')
+        : t('settings.shortcut.waiting')
+    }
+    return formatShortcutForDisplay(type === 'global' ? shortcut : newChatShortcut)
+  }
 
   return (
     <Container>
@@ -396,17 +415,34 @@ export function SettingsContainer({ onBack }: Props): React.ReactElement {
         <Label>{t('settings.shortcut.label')}</Label>
         <ShortcutWrapper>
           <ShortcutButton
-            ref={buttonRef}
-            $recording={isRecording}
-            onClick={() => setIsRecording(true)}
+            ref={globalButtonRef}
+            $recording={recordingType === 'global'}
+            onClick={() => setRecordingType('global')}
           >
-            {displayValue}
+            {getDisplayValue('global')}
           </ShortcutButton>
-          <ClearButton onClick={handleClear} title={t('settings.shortcut.reset')}>
+          <ClearButton onClick={(e) => handleClear(e, 'global')} title={t('settings.shortcut.reset')}>
             ×
           </ClearButton>
         </ShortcutWrapper>
         <HelpText>{t('settings.shortcut.help')}</HelpText>
+      </Section>
+
+      <Section>
+        <Label>{t('settings.newChatShortcut.label')}</Label>
+        <ShortcutWrapper>
+          <ShortcutButton
+            ref={newChatButtonRef}
+            $recording={recordingType === 'newChat'}
+            onClick={() => setRecordingType('newChat')}
+          >
+            {getDisplayValue('newChat')}
+          </ShortcutButton>
+          <ClearButton onClick={(e) => handleClear(e, 'newChat')} title={t('settings.shortcut.reset')}>
+            ×
+          </ClearButton>
+        </ShortcutWrapper>
+        <HelpText>{t('settings.newChatShortcut.help')}</HelpText>
       </Section>
 
       <Section>

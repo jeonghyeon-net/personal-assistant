@@ -21,6 +21,10 @@
       "reset": "恢復預設",
       "help": "點擊後輸入新快捷鍵 · ESC取消 · ×恢復預設(⌥ Space)"
     },
+    "newChatShortcut": {
+      "label": "新對話快捷鍵",
+      "help": "點擊後輸入新快捷鍵 · ESC取消 · ×恢復預設(⌘ N)"
+    },
     "systemPrompt": {
       "label": "系統提示詞",
       "placeholder": "設定AI的性格和語氣...",

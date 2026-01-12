@@ -1,62 +1,81 @@
-import { execSync } from 'child_process'
-import { appendFileSync } from 'fs'
+import { existsSync, readFileSync, readdirSync } from 'fs'
 import { join } from 'path'
 import { homedir } from 'os'
-
-const logFile = join(homedir(), 'pa-debug.log')
-const log = (msg: string) => {
-  const timestamp = new Date().toISOString()
-  appendFileSync(logFile, `[${timestamp}] ${msg}\n`)
-}
 
 process.stdout.on('error', () => {})
 process.stderr.on('error', () => {})
 
-log('[fixPath] Starting, platform: ' + process.platform)
-log('[fixPath] Initial PATH: ' + process.env.PATH)
+function fixMacPath(): void {
+  if (process.platform !== 'darwin') return
 
-function extractPath(output: string): string | null {
-  const lines = output.trim().split('\n')
-  for (let i = lines.length - 1; i >= 0; i--) {
-    const line = lines[i]
-    if (line) {
-      const trimmed = line.trim()
-      if (trimmed.includes('/') && !trimmed.includes(' ')) {
-        return trimmed
-      }
-    }
-  }
-  return null
-}
+  const currentPath = process.env.PATH || ''
+  const paths = new Set(currentPath.split(':').filter(Boolean))
 
-
-if (process.platform === 'darwin') {
   try {
-    const output = execSync('/bin/zsh -lc "echo $PATH"', {
-      encoding: 'utf8',
-      timeout: 5000,
-    })
-    const shellPath = extractPath(output)
-    if (shellPath) {
-      process.env.PATH = shellPath
-      log('[fixPath] Set PATH from zsh: ' + shellPath)
-    }
-  } catch (zshError) {
-    log('[fixPath] zsh failed: ' + (zshError instanceof Error ? zshError.message : String(zshError)))
-    try {
-      const output = execSync('/bin/bash -lc "echo $PATH"', {
-        encoding: 'utf8',
-        timeout: 5000,
-      })
-      const bashPath = extractPath(output)
-      if (bashPath) {
-        process.env.PATH = bashPath
-        log('[fixPath] Set PATH from bash: ' + bashPath)
+    const etcPaths = readFileSync('/etc/paths', 'utf8')
+    etcPaths.split('\n').filter(Boolean).forEach((p) => paths.add(p))
+  } catch {
+    ['/usr/local/bin', '/usr/bin', '/bin', '/usr/sbin', '/sbin'].forEach((p) => paths.add(p))
+  }
+
+  try {
+    const pathsD = '/etc/paths.d'
+    if (existsSync(pathsD)) {
+      for (const file of readdirSync(pathsD)) {
+        try {
+          const content = readFileSync(join(pathsD, file), 'utf8')
+          content.split('\n').filter(Boolean).forEach((p) => paths.add(p))
+        } catch {
+          continue
+        }
       }
-    } catch (bashError) {
-      log('[fixPath] bash also failed: ' + (bashError instanceof Error ? bashError.message : String(bashError)))
+    }
+  } catch {
+    // ignore
+  }
+
+  const home = homedir()
+  const commonPaths = [
+    '/opt/homebrew/bin',
+    '/opt/homebrew/sbin',
+    '/usr/local/bin',
+    join(home, '.local/bin'),
+    join(home, '.cargo/bin'),
+    join(home, 'go/bin'),
+    join(home, '.npm-global/bin'),
+    join(home, '.nvm/versions/node'),
+    join(home, '.fnm/node-versions'),
+    join(home, '.volta/bin'),
+    join(home, '.asdf/shims'),
+  ]
+
+  for (const p of commonPaths) {
+    if (existsSync(p)) {
+      if (p.includes('.nvm/versions/node')) {
+        try {
+          const versions = readdirSync(p).filter((v) => v.startsWith('v'))
+          for (const v of versions) {
+            paths.add(join(p, v, 'bin'))
+          }
+        } catch {
+          continue
+        }
+      } else if (p.includes('.fnm/node-versions')) {
+        try {
+          const versions = readdirSync(p).filter((v) => v.startsWith('v'))
+          for (const v of versions) {
+            paths.add(join(p, v, 'installation/bin'))
+          }
+        } catch {
+          continue
+        }
+      } else {
+        paths.add(p)
+      }
     }
   }
+
+  process.env.PATH = [...paths].join(':')
 }
 
-log('[fixPath] Final PATH: ' + process.env.PATH)
+fixMacPath()

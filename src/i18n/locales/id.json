@@ -21,6 +21,10 @@
       "reset": "Atur ulang",
       "help": "Klik dan masukkan pintasan baru · ESC untuk batal · × untuk memulihkan (⌥ Space)"
     },
+    "newChatShortcut": {
+      "label": "Pintasan Obrolan Baru",
+      "help": "Klik dan masukkan pintasan baru · ESC untuk batal · × untuk memulihkan (⌘ N)"
+    },
     "systemPrompt": {
       "label": "System Prompt",
       "placeholder": "Atur kepribadian AI...",

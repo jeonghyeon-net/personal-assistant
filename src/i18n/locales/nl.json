@@ -21,6 +21,10 @@
       "reset": "Herstellen",
       "help": "Klik en voer nieuwe sneltoets in · ESC om te annuleren · × om standaard te herstellen (⌥ Space)"
     },
+    "newChatShortcut": {
+      "label": "Sneltoets nieuw gesprek",
+      "help": "Klik en voer nieuwe sneltoets in · ESC om te annuleren · × om standaard te herstellen (⌘ N)"
+    },
     "systemPrompt": {
       "label": "Systeemprompt",
       "placeholder": "Stel AI-persoonlijkheid in...",

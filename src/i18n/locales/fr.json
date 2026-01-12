@@ -21,6 +21,10 @@
       "reset": "Réinitialiser",
       "help": "Cliquez et entrez un nouveau raccourci · ESC pour annuler · × pour restaurer (⌥ Space)"
     },
+    "newChatShortcut": {
+      "label": "Raccourci nouvelle conversation",
+      "help": "Cliquez et entrez un nouveau raccourci · ESC pour annuler · × pour restaurer (⌘ N)"
+    },
     "systemPrompt": {
       "label": "Prompt système",
       "placeholder": "Définir la personnalité de l'IA...",

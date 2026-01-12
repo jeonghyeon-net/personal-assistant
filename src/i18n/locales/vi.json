@@ -21,6 +21,10 @@
       "reset": "Đặt lại",
       "help": "Nhấp và nhập phím tắt mới · ESC để hủy · × để khôi phục (⌥ Space)"
     },
+    "newChatShortcut": {
+      "label": "Phím tắt cuộc trò chuyện mới",
+      "help": "Nhấp và nhập phím tắt mới · ESC để hủy · × để khôi phục (⌘ N)"
+    },
     "systemPrompt": {
       "label": "Prompt hệ thống",
       "placeholder": "Thiết lập tính cách AI...",

@@ -21,6 +21,10 @@
       "reset": "Sıfırla",
       "help": "Tıklayın ve yeni kısayol girin · İptal için ESC · Varsayılana dönmek için × (⌥ Space)"
     },
+    "newChatShortcut": {
+      "label": "Yeni Sohbet Kısayolu",
+      "help": "Tıklayın ve yeni kısayol girin · İptal için ESC · Varsayılana dönmek için × (⌘ N)"
+    },
     "systemPrompt": {
       "label": "Sistem Promptu",
       "placeholder": "AI kişiliğini ayarlayın...",

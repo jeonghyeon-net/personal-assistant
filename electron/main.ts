@@ -27,6 +27,7 @@ interface ChatSession {
 interface StoreSchema {
   ultrathinkEnabled: boolean
   globalShortcut: string
+  newChatShortcut: string
   systemPrompt: string
   sessions: ChatSession[]
   openAtLogin: boolean
@@ -37,6 +38,7 @@ const store = new Store<StoreSchema>({
   defaults: {
     ultrathinkEnabled: true,
     globalShortcut: 'Alt+Space',
+    newChatShortcut: 'CommandOrControl+N',
     systemPrompt: DEFAULT_SYSTEM_PROMPT,
     sessions: [],
     openAtLogin: false,
@@ -44,20 +46,57 @@ const store = new Store<StoreSchema>({
   },
 })
 
-function registerGlobalShortcut(shortcut: string): boolean {
+function registerAllShortcuts(): void {
   globalShortcut.unregisterAll()
+  const savedGlobalShortcut = store.get('globalShortcut')
+  const savedNewChatShortcut = store.get('newChatShortcut')
+  registerSingleShortcut(savedGlobalShortcut, 'global')
+  registerSingleShortcut(savedNewChatShortcut, 'newChat')
+}
+
+function registerSingleShortcut(shortcut: string, type: 'global' | 'newChat'): boolean {
   try {
-    const success = globalShortcut.register(shortcut, () => {
-      if (mainWindow?.isVisible()) {
-        mainWindow.hide()
-      } else {
-        showWindow()
-      }
-    })
-    return success
+    if (type === 'global') {
+      return globalShortcut.register(shortcut, () => {
+        if (mainWindow?.isVisible()) {
+          mainWindow.hide()
+        } else {
+          showWindow()
+        }
+      })
+    } else {
+      return globalShortcut.register(shortcut, () => {
+        if (!mainWindow?.isVisible()) {
+          showWindow()
+        }
+        mainWindow?.webContents.send('chat:new')
+      })
+    }
   } catch {
     return false
   }
+}
+
+function updateShortcut(shortcut: string, type: 'global' | 'newChat'): boolean {
+  const currentGlobal = store.get('globalShortcut')
+  const currentNewChat = store.get('newChatShortcut')
+  const oldShortcut = type === 'global' ? currentGlobal : currentNewChat
+  try {
+    globalShortcut.unregister(oldShortcut)
+  } catch {
+    // ignore
+  }
+  const success = registerSingleShortcut(shortcut, type)
+  if (success) {
+    if (type === 'global') {
+      store.set('globalShortcut', shortcut)
+    } else {
+      store.set('newChatShortcut', shortcut)
+    }
+  } else {
+    registerSingleShortcut(oldShortcut, type)
+  }
+  return success
 }
 
 let mainWindow: BrowserWindow | null = null
@@ -231,9 +270,16 @@ ipcMain.handle('config:set', (_event, key: string, value: unknown) => {
 })
 
 ipcMain.handle('config:set-shortcut', (_event, shortcut: string) => {
-  const success = registerGlobalShortcut(shortcut)
+  const success = updateShortcut(shortcut, 'global')
   if (success) {
-    store.set('globalShortcut', shortcut)
+    return { success: true }
+  }
+  return { success: false, error: '단축키 등록 실패' }
+})
+
+ipcMain.handle('config:set-new-chat-shortcut', (_event, shortcut: string) => {
+  const success = updateShortcut(shortcut, 'newChat')
+  if (success) {
     return { success: true }
   }
   return { success: false, error: '단축키 등록 실패' }
@@ -278,8 +324,7 @@ app.whenReady().then(() => {
   createWindow()
   showWindow()
 
-  const savedShortcut = store.get('globalShortcut')
-  registerGlobalShortcut(savedShortcut)
+  registerAllShortcuts()
 })
 
 app.on('window-all-closed', () => {

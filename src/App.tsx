@@ -99,6 +99,14 @@ export function App(): React.ReactElement {
     checkClaudeAvailability()
   }, [checkClaudeAvailability])
 
+  useEffect(() => {
+    const unsubscribe = window.api.chat.onNewChat(() => {
+      clearChat()
+      setView('chat')
+    })
+    return unsubscribe
+  }, [clearChat])
+
   return (
     <AppWrapper>
       {view === 'chat' && (

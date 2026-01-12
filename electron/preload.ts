@@ -74,6 +74,14 @@ const api = {
     },
   },
 
+  chat: {
+    onNewChat: (callback: () => void): (() => void) => {
+      const handler = (): void => callback()
+      ipcRenderer.on('chat:new', handler)
+      return () => ipcRenderer.removeListener('chat:new', handler)
+    },
+  },
+
   shell: {
     openExternal: (url: string): Promise<void> =>
       ipcRenderer.invoke('shell:open-external', url),
@@ -88,6 +96,9 @@ const api = {
 
     setShortcut: (shortcut: string): Promise<{ success: boolean; error?: string }> =>
       ipcRenderer.invoke('config:set-shortcut', shortcut),
+
+    setNewChatShortcut: (shortcut: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('config:set-new-chat-shortcut', shortcut),
 
     setOpenAtLogin: (enabled: boolean): Promise<{ success: boolean }> =>
       ipcRenderer.invoke('config:set-open-at-login', enabled),

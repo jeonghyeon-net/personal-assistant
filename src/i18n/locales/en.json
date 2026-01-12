@@ -21,6 +21,10 @@
       "reset": "Reset to default",
       "help": "Click and press new shortcut · ESC to cancel · × to restore default (⌥ Space)"
     },
+    "newChatShortcut": {
+      "label": "New Chat Shortcut",
+      "help": "Click and press new shortcut · ESC to cancel · × to restore default (⌘ N)"
+    },
     "systemPrompt": {
       "label": "System Prompt",
       "placeholder": "Set the AI's personality and tone...",

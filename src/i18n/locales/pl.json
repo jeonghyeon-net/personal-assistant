@@ -21,6 +21,10 @@
       "reset": "Resetuj",
       "help": "Kliknij i wprowadź nowy skrót · ESC aby anulować · × aby przywrócić (⌥ Space)"
     },
+    "newChatShortcut": {
+      "label": "Skrót nowego czatu",
+      "help": "Kliknij i wprowadź nowy skrót · ESC aby anulować · × aby przywrócić (⌘ N)"
+    },
     "systemPrompt": {
       "label": "Prompt systemowy",
       "placeholder": "Ustaw osobowość AI...",

@@ -21,6 +21,10 @@
       "reset": "Zurücksetzen",
       "help": "Klicken und neue Tastenkombination eingeben · ESC zum Abbrechen · × für Standard (⌥ Space)"
     },
+    "newChatShortcut": {
+      "label": "Neuer Chat Tastenkombination",
+      "help": "Klicken und neue Tastenkombination eingeben · ESC zum Abbrechen · × für Standard (⌘ N)"
+    },
     "systemPrompt": {
       "label": "System-Prompt",
       "placeholder": "KI-Persönlichkeit festlegen...",
