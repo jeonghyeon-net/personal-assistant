@@ -1,4 +1,4 @@
-# PA (Personal Assistant) - Claude Code 지침
+# Personal Assistant - Claude Code 지침
 
 ## 프로젝트 개요
 

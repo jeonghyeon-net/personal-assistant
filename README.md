@@ -1,4 +1,4 @@
-# PA (Personal Assistant)
+# Personal Assistant
 
 macOS 메뉴바에서 Claude Code와 대화할 수 있는 앱
 
@@ -40,8 +40,8 @@ pnpm build
 ## 빌드 결과물
 
 ```
-release/PA-1.0.0-arm64.dmg
-release/PA-1.0.0-arm64-mac.zip
+release/Personal Assistant-1.0.0-arm64.dmg
+release/Personal Assistant-1.0.0-arm64-mac.zip
 ```
 
 ## 요구사항

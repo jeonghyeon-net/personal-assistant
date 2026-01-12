@@ -118,7 +118,7 @@ function createTray(): void {
   icon.setTemplateImage(true)
 
   tray = new Tray(icon)
-  tray.setToolTip('PA')
+  tray.setToolTip('Personal Assistant')
 
   tray.on('click', () => {
     if (mainWindow?.isVisible()) {
