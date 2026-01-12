@@ -326,13 +326,10 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     set({ isGeneratingTitle: true })
     try {
       const result = await window.api.title.generate(message)
-      if (result.success) {
-        set({ currentTitle: result.title, isGeneratingTitle: false })
-      } else {
-        set({ currentTitle: message.slice(0, 20), isGeneratingTitle: false })
-      }
+      set({ currentTitle: result.title, isGeneratingTitle: false })
     } catch {
-      set({ currentTitle: message.slice(0, 20), isGeneratingTitle: false })
+      const fallback = message.replace(/https?:\/\/[^\s]+/g, '').trim() || message
+      set({ currentTitle: fallback.slice(0, 20), isGeneratingTitle: false })
     }
   },
 }))

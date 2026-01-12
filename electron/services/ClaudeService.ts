@@ -445,6 +445,7 @@ class ClaudeService {
       const sdkOptions: Options = {
         cwd: homedir(),
         pathToClaudeCodeExecutable: this.claudePath,
+        systemPrompt: '당신은 제목 요약 전문가입니다. 도구를 사용하지 말고 텍스트로만 응답하세요. 간결하게 핵심만 출력하세요.',
         maxTurns: 1,
         permissionMode: 'bypassPermissions',
       }
@@ -470,6 +471,7 @@ class ClaudeService {
       return { success: true, title }
     } catch (error) {
       console.error('[ClaudeService] Title generation error:', error)
+      log('[ClaudeService] Title generation error: ' + (error instanceof Error ? error.message : String(error)))
       return { success: false, title: fallbackTitle }
     }
   }
