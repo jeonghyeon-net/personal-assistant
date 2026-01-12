@@ -6,6 +6,7 @@ import {
   ipcMain,
   nativeImage,
   globalShortcut,
+  shell,
 } from 'electron'
 import { join } from 'path'
 import { homedir } from 'os'
@@ -174,6 +175,12 @@ ipcMain.handle('window:hide', () => {
 ipcMain.handle('app:quit', () => {
   mainWindow?.destroy()
   app.quit()
+})
+
+ipcMain.handle('shell:open-external', (_event, url: string) => {
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return shell.openExternal(url)
+  }
 })
 
 ipcMain.handle('config:get', (_event, key: string) => {

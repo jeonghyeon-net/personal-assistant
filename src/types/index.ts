@@ -87,6 +87,9 @@ export interface API {
     quit: () => Promise<void>
     onFocus: (callback: () => void) => () => void
   }
+  shell: {
+    openExternal: (url: string) => Promise<void>
+  }
   config: {
     get: <T = unknown>(key: string) => Promise<T>
     set: (key: string, value: unknown) => Promise<void>

@@ -69,6 +69,11 @@ const api = {
     },
   },
 
+  shell: {
+    openExternal: (url: string): Promise<void> =>
+      ipcRenderer.invoke('shell:open-external', url),
+  },
+
   config: {
     get: <T = unknown>(key: string): Promise<T> =>
       ipcRenderer.invoke('config:get', key),
